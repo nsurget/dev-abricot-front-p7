@@ -1,15 +1,18 @@
 @import "tailwindcss";
 
+@theme {
+  --color-brand-orange: #d3590b;
+  --color-neutral-grey-50: #f9fafb;
+  --color-neutral-grey-100: #f3f4f6;
+  --color-neutral-grey-200: #e5e7eb;
+  --color-neutral-grey-800: #1f1f1f;
+  --font-manrope: var(--font-manrope);
+  --font-inter: var(--font-inter);
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
