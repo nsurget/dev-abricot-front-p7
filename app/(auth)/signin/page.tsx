@@ -4,22 +4,54 @@ import Link from "next/link";
 import Image from "next/image";
 import Logo from "@/components/Logo";
 import { useForm } from "react-hook-form";
+import axiosInstance from "@/lib/axios";
+import { useAuthStore } from "@/store/authStore";
+import React from "react";
+import Toast from "@/components/Toast";
+import { AxiosError } from "axios";
+import { useRouter } from "next/navigation";
+interface LoginFormData {
+  email: string;
+  password: string;
+}
 
-export default function LoginPage() {
+export default function SignInPage() {
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm();
+  } = useForm<LoginFormData>();
+  const router = useRouter();
 
-  const handleForgotPassword = (e: React.MouseEvent) => {
-    e.preventDefault();
-    alert("Fonctionnalité de mot de passe oublié à venir.");
-  };
+  const login = useAuthStore((state) => state.login);
+  const [error, setError] = React.useState<string | null>(null);
+  const [loading, setLoading] = React.useState(false);
 
-  const onSubmit = (data: { email?: string }) => {
-    console.log("Login data:", data);
-    alert(`Connecté avec : ${data.email}`);
+  const onSubmit = async (data: LoginFormData) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await axiosInstance.post("/auth/register", {
+        email: data.email,
+        password: data.password,
+      });
+
+      const { token, user } = response.data;
+      login(token, user);
+      
+      router.push("/dashboard");
+    } catch (err: unknown) {
+      console.error("SignIn error:", err);
+      const message =
+        err instanceof AxiosError
+          ? err.response?.data?.message
+          : undefined;
+      setError(
+        message || "Erreur lors de l'inscription. Veuillez réessayer."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -27,33 +59,37 @@ export default function LoginPage() {
       {/* Background Image Container */}
       <div className="hidden lg:block absolute inset-0 z-0">
         <Image
-          src="/login-hero.jpg"
-          alt="Login Hero"
+          src="/signin-hero.jpg"
+          alt="Sign In Hero"
           fill
           className="object-cover"
           priority
         />
       </div>
 
-      {/* Mobile-only background (or same for both if preferred) */}
+      {/* Mobile-only background */}
       <div className="lg:hidden absolute inset-0 z-0">
         <Image
-          src="/login-hero.jpg"
-          alt="Login Hero"
+          src="/signin-hero.jpg"
+          alt="Sign In Hero"
           fill
           className="object-cover opacity-20"
         />
       </div>
 
-      {/* Login Card Panel */}
+      {/* Sign In Card Panel */}
       <section className="relative z-10 bg-neutral-grey-50 w-full max-w-[562px] min-h-screen flex flex-col items-center justify-between px-6 py-10 md:px-[100px] lg:px-[140px] md:py-[55px] shadow-2xl overflow-y-auto">
         <div className="w-full flex flex-col items-center gap-[60px] md:gap-[150px] lg:gap-[202px]">
           <Logo width={252} height={32} />
 
           <div className="w-full flex flex-col gap-[30px] items-center">
             <h1 className="font-manrope font-bold text-[32px] md:text-[40px] text-brand-orange leading-tight text-center">
-              Connexion
+              Inscription
             </h1>
+
+            {error && (
+              <Toast type="error" message={error} />
+            )}
 
             <form
               onSubmit={handleSubmit(onSubmit)}
@@ -122,17 +158,12 @@ export default function LoginPage() {
               <div className="flex flex-col gap-[21px] items-center mt-2">
                 <button
                   type="submit"
-                  className="w-full h-[50px] bg-neutral-grey-800 hover:bg-black text-white font-inter font-semibold rounded-[10px] transition-all cursor-pointer transform active:scale-[0.98]"
+                  disabled={loading}
+                  className={`w-full h-[50px] bg-neutral-grey-800 hover:bg-black text-white font-inter font-semibold rounded-[10px] transition-all cursor-pointer transform active:scale-[0.98] ${
+                    loading ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
                 >
-                  Se connecter
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleForgotPassword}
-                  className="text-brand-orange text-sm underline font-inter hover:text-opacity-80 transition-all bg-transparent border-none cursor-pointer"
-                >
-                  Mot de passe oublié?
+                  {loading ? "Inscription..." : "S’inscrire"}
                 </button>
               </div>
             </form>
@@ -140,12 +171,12 @@ export default function LoginPage() {
         </div>
 
         <div className="w-full flex flex-wrap justify-center items-center gap-2 mt-12 md:mt-8 font-inter text-sm pb-4">
-          <span className="text-neutral-grey-800">Pas encore de compte ?</span>
+          <span className="text-neutral-grey-800">Déjà inscrit ?</span>
           <Link
-            href="/signin"
+            href="/login"
             className="text-brand-orange underline hover:text-opacity-80 transition-all font-semibold"
           >
-            Créer un compte
+            Se connecter
           </Link>
         </div>
       </section>
