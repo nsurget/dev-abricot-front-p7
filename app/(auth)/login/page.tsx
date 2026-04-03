@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import Logo from "@/components/Logo";
-import Toast from "@/components/Toast";
+import Toast from "@/components/ui/Toast";
 import { useLogin } from "@/hooks/useLogin";
 
 export default function LoginPage() {
@@ -77,9 +77,8 @@ export default function LoginPage() {
                     },
                     value: "alice@example.com"
                   })}
-                  className={`w-full h-[53px] px-[17px] bg-white border ${
-                    errors.email ? "border-red-500" : "border-neutral-grey-200"
-                  } rounded-[4px] focus:outline-none focus:border-brand-orange focus:ring-1 focus:ring-brand-orange ring-offset-0 transition-all font-inter text-black`}
+                  className={`w-full h-[53px] px-[17px] bg-white border ${errors.email ? "border-red-500" : "border-neutral-grey-200"
+                    } rounded-[4px] focus:outline-none focus:border-brand-orange focus:ring-1 focus:ring-brand-orange ring-offset-0 transition-all font-inter text-black`}
                 />
                 {errors.email && (
                   <span className="text-red-500 text-xs">
@@ -107,11 +106,10 @@ export default function LoginPage() {
                     },
                     value: "password123"
                   })}
-                  className={`w-full h-[53px] px-[17px] bg-white border ${
-                    errors.password
+                  className={`w-full h-[53px] px-[17px] bg-white border ${errors.password
                       ? "border-red-500"
                       : "border-neutral-grey-200"
-                  } rounded-[4px] focus:outline-none focus:border-brand-orange focus:ring-1 focus:ring-brand-orange ring-offset-0 transition-all font-inter text-black`}
+                    } rounded-[4px] focus:outline-none focus:border-brand-orange focus:ring-1 focus:ring-brand-orange ring-offset-0 transition-all font-inter text-black`}
                 />
                 {errors.password && (
                   <span className="text-red-500 text-xs">
@@ -124,9 +122,8 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className={`w-full h-[50px] bg-neutral-grey-800 hover:bg-black text-white font-inter font-semibold rounded-[10px] transition-all cursor-pointer transform active:scale-[0.98] ${
-                    loading ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
+                  className={`w-full h-[50px] bg-neutral-grey-800 hover:bg-black text-white font-inter font-semibold rounded-[10px] transition-all cursor-pointer transform active:scale-[0.98] ${loading ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                 >
                   {loading ? "Connexion..." : "Se connecter"}
                 </button>

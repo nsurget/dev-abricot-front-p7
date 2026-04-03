@@ -5,8 +5,8 @@ import { useAuthStore } from "@/store/authStore";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-export function UserMenu() {
-    const { user } = useUserInfo();
+export function UserMenu({ className }: { className?: string }) {
+    const user = useUserInfo();
     const logout = useAuthStore((state) => state.logout);
     const router = useRouter();
 
@@ -30,7 +30,7 @@ export function UserMenu() {
         : "??";
 
     return (
-        <div className="relative group">
+        <div className={`relative group ${className}`}>
             {/* User Avatar */}
             <div className="flex items-center justify-center bg-[#ffe8d9] text-[#0f0f0f] rounded-full size-[65px] font-medium text-sm cursor-pointer hover:opacity-90 transition-opacity">
                 {initials}

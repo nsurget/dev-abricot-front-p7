@@ -13,8 +13,5 @@ export interface UserProfile {
 export function useUserInfo() {
     const user = useAuthStore((state) => state.user);
     
-    return { 
-        user,
-        error: null 
-    };
+    return user;
 }

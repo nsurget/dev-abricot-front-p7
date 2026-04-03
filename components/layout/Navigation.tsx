@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { MenuDashboardIcon } from "../icons/MenuDashboardIcon";
 import { MenuProjectsIcon } from "../icons/MenuProjectsIcon";
 
-export function Navigation() {
+export function Navigation({ className }: { className?: string }) {
     const pathname = usePathname();
 
     const menuItems = [
@@ -22,7 +22,7 @@ export function Navigation() {
     ];
 
     return (
-        <nav>
+        <nav className={className}>
             <ul className="flex gap-4">
                 {menuItems.map((item) => {
                     const isActive = pathname === item.href;

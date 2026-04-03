@@ -28,6 +28,7 @@ axiosInstance.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       Cookies.remove('auth_token');
+      
       // Rediriger uniquement si on n'est pas déjà sur la page de connexion
       if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
         window.location.href = '/login';
