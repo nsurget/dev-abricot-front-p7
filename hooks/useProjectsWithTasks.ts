@@ -1,28 +1,10 @@
 import axiosInstance from "@/lib/axios";
 import React from "react";
 import { AxiosError } from "axios";
+import { ProjectWithTasks } from "@/types/projectWithTasks";
 
-interface Project {
-    id: string;
-    name: string;
-    description: string;
-    ownerId: string;
-    owner: User;
-    members: User[];
-    createdAt: string;
-    updatedAt: string;
-}
-
-interface User {
-    id: string;
-    name: string;
-    email: string;
-    createdAt: string;
-    updatedAt: string;
-}
-
-export function useProjects() {
-    const [projects, setProjects] = React.useState<Project[]>([]);
+export function useProjectsWithTasks() {
+    const [projects, setProjects] = React.useState<ProjectWithTasks[]>([]);
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
 

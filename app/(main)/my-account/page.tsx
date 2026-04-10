@@ -77,6 +77,11 @@ export default function MyAccountPage() {
 
             if (successMessages.length > 0) {
                 setSuccess(successMessages);
+
+                window.scrollTo({
+                    top: 0,
+                    behavior: "smooth",
+                });
             }
             
         } catch (err: unknown) {
@@ -85,7 +90,7 @@ export default function MyAccountPage() {
                 const messages: string[] = [];
                 
                 if (responseData?.data?.errors && Array.isArray(responseData.data.errors)) {
-                    responseData.data.errors.forEach((e: any) => messages.push(e.message));
+                    responseData.data.errors.forEach((e: { message: string }) => messages.push(e.message));
                 } else if (responseData?.message) {
                     messages.push(responseData.message);
                 } else {
@@ -174,7 +179,7 @@ export default function MyAccountPage() {
 
                     <div className="mb-5">
                         <label htmlFor="currentPassword" title="Mot de passe actuel" className="block text-lg font-medium text-gray-700">
-                            Ancien mot de passe
+                            Ancien mot de passe <span className="text-sm text-gray-500">(laisser vide si inchangé)</span>
                         </label>
                         <input
                             type="password"
@@ -192,7 +197,7 @@ export default function MyAccountPage() {
 
                     <div className="mb-5">
                         <label htmlFor="newPassword" title="Nouveau mot de passe" className="block text-lg font-medium text-gray-700">
-                            Nouveau mot de passe
+                            Nouveau mot de passe <span className="text-sm text-gray-500">(laisser vide si inchangé)</span>
                         </label>
                         <input
                             type="password"

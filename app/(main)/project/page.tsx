@@ -1,13 +1,12 @@
 "use client";
 
-import { useProjects } from "@/hooks/useProjects";
 import PageHero from "@/components/layout/PageHero";
-import { useRouter } from "next/navigation";
+import ProjectCard from "@/components/project/projectCard";
+import { useProjectsWithTasks } from "@/hooks/useProjectsWithTasks";
 
 export default function ProjectsPage() {
 
-  const router = useRouter();
-  const { projects, loading, error } = useProjects();
+  const { projects, loading, error } = useProjectsWithTasks();
 
   if (loading) {
     return <div>Loading...</div>;
@@ -22,7 +21,6 @@ export default function ProjectsPage() {
       <PageHero
         title="Mes projets"
         subtitle="Gérez vos projets"
-        onBack={() => router.back()}
         actions={[
           {
             label: "+ Créer un projet",
@@ -32,11 +30,11 @@ export default function ProjectsPage() {
         ]}
       />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
-        <ul>
-          <pre className="bg-neutral-grey-50 p-4 rounded-lg overflow-auto text-sm text-neutral-grey-600">
-            {JSON.stringify(projects, null, 2)}
-          </pre>
-        </ul>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {projects.map((project) => (
+            <ProjectCard key={project.id} project={project} />
+          ))}
+        </div>
       </div>
     </div>
   );
