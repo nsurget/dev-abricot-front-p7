@@ -7,10 +7,13 @@ import axiosInstance from "@/lib/axios";
 import { AxiosError } from "axios";
 import React from "react";
 import Toast from "@/components/ui/Toast";
+import { useAuthStore } from "@/store/authStore";
 
 interface ProfileFormData {
     name: string;
     email: string;
+    currentPassword?: string;
+    newPassword?: string;
 }
 
 export default function MyAccountPage() {
@@ -23,34 +26,79 @@ export default function MyAccountPage() {
         formState: { errors },
     } = useForm<ProfileFormData>();
 
-    const [error, setError] = React.useState<string | null>(null);
+    const [error, setError] = React.useState<Array<string> | null>(null);
     const [loading, setLoading] = React.useState(false);
-    const [success, setSuccess] = React.useState<string | null>(null);
+    const [success, setSuccess] = React.useState<Array<string> | null>(null);
 
     const onSubmit = async (data: ProfileFormData) => {
         setLoading(true);
         setError(null);
         try {
-            const response = await axiosInstance.put("/auth/profile", {
+            const successMessages: Array<string> = [];
+            
+            const responseProfile = await axiosInstance.put("/auth/profile", {
                 email: data.email,
-                name: data.name,
+                name: data.name
             });
 
-            const { success, message } = response.data;
+            const { success : successProfile, message: messageProfile } = responseProfile.data;
 
-            if (success) {
-                setSuccess(message);
+            // update user in store
+            if (user) {
+                useAuthStore.setState({
+                    user: {
+                        ...user,
+                        name: data.name,
+                        email: data.email,
+                    },
+                });
             }
+
+            if (successProfile) {
+                successMessages.push(messageProfile);
+            }
+
+            if (data.currentPassword && data.newPassword) {
+                const responsePassword = await axiosInstance.put("/auth/password", {
+                    currentPassword: data.currentPassword,
+                    newPassword: data.newPassword,
+                });
+
+                const { success : successPassword, message: messagePassword } = responsePassword.data;
+
+                if (successPassword) {
+                    successMessages.push(messagePassword);
+                }
+            } else if (!data.currentPassword && data.newPassword) {
+                setError(["L'ancien mot de passe est requis"]);
+            } else if (data.currentPassword && !data.newPassword) {
+                setError(["Le nouveau mot de passe est requis"]);
+            }
+
+            if (successMessages.length > 0) {
+                setSuccess(successMessages);
+            }
+            
         } catch (err: unknown) {
-            console.error("Profile update error:", err);
-            const message =
-                err instanceof AxiosError
-                    ? err.response?.data?.message
-                    : undefined;
-            setError(
-                message || "Erreur lors de la mise à jour du profil. Veuillez réessayer."
-            );
+            if (err instanceof AxiosError) {
+                const responseData = err.response?.data;
+                const messages: string[] = [];
+                
+                if (responseData?.data?.errors && Array.isArray(responseData.data.errors)) {
+                    responseData.data.errors.forEach((e: any) => messages.push(e.message));
+                } else if (responseData?.message) {
+                    messages.push(responseData.message);
+                } else {
+                    messages.push("Erreur lors de la mise à jour du profil. Veuillez réessayer.");
+                }
+                setError(messages);
+            } else {
+                setError(["Une erreur inattendue est survenue. Veuillez réessayer."]);
+            }
         } finally {
+            
+
+            
             setLoading(false);
         }
     };
@@ -59,13 +107,21 @@ export default function MyAccountPage() {
         <div className="min-h-screen">
 
             {error && (
-                <Toast type="error" message={error} />
+                <Container className="mt-5 mb-5">
+                    {error.map((message, index) => (
+                        <Toast key={index} type="error" message={message} />
+                    ))}
+                </Container>
             )}
             {success && (
-                <Toast type="success" message={success} />
+                <Container className="mt-5 mb-5">
+                    {success.map((message, index) => (
+                        <Toast key={index} type="success" message={message} />
+                    ))}
+                </Container>
             )}
 
-            <Container>
+            <Container background={true}>
                 <h1 className="text-2xl font-bold mt-10">Mon compte</h1>
                 <p className="text-lg mt-3 text-gray-600">{user?.name}</p>
 
@@ -113,6 +169,47 @@ export default function MyAccountPage() {
                         />
                         {errors.email && (
                             <p className="mt-2 text-sm text-red-600">{errors.email.message}</p>
+                        )}
+                    </div>
+
+                    <div className="mb-5">
+                        <label htmlFor="currentPassword" title="Mot de passe actuel" className="block text-lg font-medium text-gray-700">
+                            Ancien mot de passe
+                        </label>
+                        <input
+                            type="password"
+                            id="currentPassword"
+                            {...register("currentPassword")}
+                            className={`mt-2 w-full h-[53px] px-[17px] bg-white border ${errors.currentPassword
+                                ? "border-red-500"
+                                : "border-neutral-grey-200"
+                                } rounded-[4px] focus:outline-none focus:border-brand-orange focus:ring-1 focus:ring-brand-orange ring-offset-0 transition-all font-inter text-black`}
+                        />
+                        {errors.currentPassword && (
+                            <p className="mt-2 text-sm text-red-600">{errors.currentPassword.message}</p>
+                        )}
+                    </div>
+
+                    <div className="mb-5">
+                        <label htmlFor="newPassword" title="Nouveau mot de passe" className="block text-lg font-medium text-gray-700">
+                            Nouveau mot de passe
+                        </label>
+                        <input
+                            type="password"
+                            id="newPassword"
+                            {...register("newPassword", {
+                                minLength: {
+                                    value: 8,
+                                    message: "Le nouveau mot de passe doit contenir au moins 8 caractères",
+                                },
+                            })}
+                            className={`mt-2 w-full h-[53px] px-[17px] bg-white border ${errors.newPassword
+                                ? "border-red-500"
+                                : "border-neutral-grey-200"
+                                } rounded-[4px] focus:outline-none focus:border-brand-orange focus:ring-1 focus:ring-brand-orange ring-offset-0 transition-all font-inter text-black`}
+                        />
+                        {errors.newPassword && (
+                            <p className="mt-2 text-sm text-red-600">{errors.newPassword.message}</p>
                         )}
                     </div>
 
