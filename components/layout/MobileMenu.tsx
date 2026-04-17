@@ -106,7 +106,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                         <Link
                             href="/my-account"
                             onClick={onClose}
-                            className="block px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-xl transition-colors"
+                            className={`block px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-xl transition-colors ${pathname === "/my-account" ? "bg-gray-100" : ""}`}
                         >
                             Mon compte
                         </Link>

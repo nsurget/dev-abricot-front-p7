@@ -111,20 +111,24 @@ export default function MyAccountPage() {
     return (
         <div className="min-h-screen">
 
-            {error && (
-                <Container className="mt-5 mb-5">
-                    {error.map((message, index) => (
-                        <Toast key={index} type="error" message={message} />
-                    ))}
-                </Container>
-            )}
-            {success && (
-                <Container className="mt-5 mb-5">
-                    {success.map((message, index) => (
-                        <Toast key={index} type="success" message={message} />
-                    ))}
-                </Container>
-            )}
+            <div aria-live="polite" className="w-full">
+                {error && (
+                    <Container className="mt-5 mb-5">
+                        {error.map((message, index) => (
+                            <Toast key={index} type="error" message={message} />
+                        ))}
+                    </Container>
+                )}
+            </div>
+            <div aria-live="polite" className="w-full">
+                {success && (
+                    <Container className="mt-5 mb-5">
+                        {success.map((message, index) => (
+                            <Toast key={index} type="success" message={message} />
+                        ))}
+                    </Container>
+                )}
+            </div>
 
             <Container background={true}>
                 <h1 className="text-2xl font-bold mt-10">Mon compte</h1>
@@ -139,6 +143,8 @@ export default function MyAccountPage() {
                             type="text"
                             id="name"
                             defaultValue={user?.name}
+                            aria-invalid={errors.name ? "true" : "false"}
+                            aria-describedby={errors.name ? "name-error" : undefined}
                             {...register("name", {
                                 required: "Le nom est requis",
                             })}
@@ -148,7 +154,7 @@ export default function MyAccountPage() {
                                 } rounded-[4px] focus:outline-none focus:border-brand-orange focus:ring-1 focus:ring-brand-orange ring-offset-0 transition-all font-inter text-black`}
                         />
                         {errors.name && (
-                            <p className="mt-2 text-sm text-red-600">{errors.name.message}</p>
+                            <p id="name-error" className="mt-2 text-sm text-red-600" role="alert">{errors.name.message}</p>
                         )}
                     </div>
 
@@ -159,6 +165,8 @@ export default function MyAccountPage() {
                         <input
                             type="email"
                             id="email"
+                            aria-invalid={errors.email ? "true" : "false"}
+                            aria-describedby={errors.email ? "email-error" : undefined}
                             {...register("email", {
                                 required: "L'email est requis",
                                 pattern: {
@@ -173,7 +181,7 @@ export default function MyAccountPage() {
                                 } rounded-[4px] focus:outline-none focus:border-brand-orange focus:ring-1 focus:ring-brand-orange ring-offset-0 transition-all font-inter text-black`}
                         />
                         {errors.email && (
-                            <p className="mt-2 text-sm text-red-600">{errors.email.message}</p>
+                            <p id="email-error" className="mt-2 text-sm text-red-600" role="alert">{errors.email.message}</p>
                         )}
                     </div>
 
@@ -184,6 +192,8 @@ export default function MyAccountPage() {
                         <input
                             type="password"
                             id="currentPassword"
+                            aria-invalid={errors.currentPassword ? "true" : "false"}
+                            aria-describedby={errors.currentPassword ? "current-password-error" : undefined}
                             {...register("currentPassword")}
                             className={`mt-2 w-full h-[53px] px-[17px] bg-white border ${errors.currentPassword
                                 ? "border-red-500"
@@ -191,7 +201,7 @@ export default function MyAccountPage() {
                                 } rounded-[4px] focus:outline-none focus:border-brand-orange focus:ring-1 focus:ring-brand-orange ring-offset-0 transition-all font-inter text-black`}
                         />
                         {errors.currentPassword && (
-                            <p className="mt-2 text-sm text-red-600">{errors.currentPassword.message}</p>
+                            <p id="current-password-error" className="mt-2 text-sm text-red-600" role="alert">{errors.currentPassword.message}</p>
                         )}
                     </div>
 
@@ -202,6 +212,8 @@ export default function MyAccountPage() {
                         <input
                             type="password"
                             id="newPassword"
+                            aria-invalid={errors.newPassword ? "true" : "false"}
+                            aria-describedby={errors.newPassword ? "new-password-error" : undefined}
                             {...register("newPassword", {
                                 minLength: {
                                     value: 8,
@@ -214,16 +226,18 @@ export default function MyAccountPage() {
                                 } rounded-[4px] focus:outline-none focus:border-brand-orange focus:ring-1 focus:ring-brand-orange ring-offset-0 transition-all font-inter text-black`}
                         />
                         {errors.newPassword && (
-                            <p className="mt-2 text-sm text-red-600">{errors.newPassword.message}</p>
+                            <p id="new-password-error" className="mt-2 text-sm text-red-600" role="alert">{errors.newPassword.message}</p>
                         )}
                     </div>
 
                     <button
                         type="submit"
                         disabled={loading}
+                        aria-busy={loading}
+                        aria-disabled={loading}
                         className="inline-flex justify-center mt-4 py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-brand-orange hover:bg-brand-orange focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-orange"
                     >
-                        {loading ? "Mise à jour..." : "Mettre à jour"}
+                        {loading ? "Mise à jour en cours..." : "Mettre à jour"}
                     </button>
                 </form>
             </Container>

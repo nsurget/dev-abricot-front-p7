@@ -13,6 +13,7 @@ interface ActionButton {
 
 interface PageHeroProps {
     title: string;
+    titleAction?: () => void;
     subtitle?: string;
     onBack?: () => void;
     actions?: ActionButton[];
@@ -20,10 +21,12 @@ interface PageHeroProps {
 
 export default function PageHero({
     title,
+    titleAction,
     subtitle,
     onBack,
     actions = [],
 }: PageHeroProps) {
+    
     return (
         <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Desktop Back Button (outside container) */}
@@ -54,8 +57,8 @@ export default function PageHero({
                     )}
 
                     <div className="flex flex-col gap-1 md:gap-2">
-                        <h1 className="text-xl md:text-2xl font-manrope font-semibold text-neutral-grey-800">
-                            {title}
+                        <h1 className="gap-2 text-xl md:text-2xl font-manrope font-semibold text-neutral-grey-800">
+                            {title} {titleAction && <Button size="sm" variant="outline" onClick={titleAction}>Modifier</Button>}
                         </h1>
                         {subtitle && (
                             <p className="text-sm md:text-lg font-inter text-neutral-grey-600 max-w-2xl leading-relaxed">
@@ -74,7 +77,7 @@ export default function PageHero({
                                 variant={action.variant}
                                 onClick={action.onClick}
                                 icon={action.icon}
-                                className="w-full sm:w-auto"
+                                className="w-full sm:w-auto hover"
                             >
                                 {action.label}
                             </Button>

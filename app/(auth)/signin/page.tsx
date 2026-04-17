@@ -60,7 +60,7 @@ export default function SignInPage() {
       <div className="hidden lg:block absolute inset-0 z-0">
         <Image
           src="/signin-hero.jpg"
-          alt="Sign In Hero"
+          alt=""
           fill
           className="object-cover"
           priority
@@ -71,7 +71,7 @@ export default function SignInPage() {
       <div className="lg:hidden absolute inset-0 z-0">
         <Image
           src="/signin-hero.jpg"
-          alt="Sign In Hero"
+          alt=""
           fill
           className="object-cover opacity-20"
         />
@@ -87,9 +87,11 @@ export default function SignInPage() {
               Inscription
             </h1>
 
-            {error && (
-              <Toast type="error" message={error} />
-            )}
+            <div aria-live="polite" className="w-full">
+              {error && (
+                <Toast type="error" message={error} />
+              )}
+            </div>
 
             <form
               onSubmit={handleSubmit(onSubmit)}
@@ -106,6 +108,8 @@ export default function SignInPage() {
                   id="email"
                   type="email"
                   placeholder="votre@email.com"
+                  aria-invalid={errors.email ? "true" : "false"}
+                  aria-describedby={errors.email ? "email-error" : undefined}
                   {...register("email", {
                     required: "L'email est requis",
                     pattern: {
@@ -117,7 +121,7 @@ export default function SignInPage() {
                     } rounded-[4px] focus:outline-none focus:border-brand-orange focus:ring-1 focus:ring-brand-orange ring-offset-0 transition-all font-inter text-black`}
                 />
                 {errors.email && (
-                  <span className="text-red-500 text-xs">
+                  <span id="email-error" className="text-red-500 text-xs" role="alert">
                     {errors.email.message as string}
                   </span>
                 )}
@@ -134,6 +138,8 @@ export default function SignInPage() {
                   id="password"
                   type="password"
                   placeholder="••••••••"
+                  aria-invalid={errors.password ? "true" : "false"}
+                  aria-describedby={errors.password ? "password-error" : undefined}
                   {...register("password", {
                     required: "Le mot de passe est requis",
                     minLength: {
@@ -147,7 +153,7 @@ export default function SignInPage() {
                     } rounded-[4px] focus:outline-none focus:border-brand-orange focus:ring-1 focus:ring-brand-orange ring-offset-0 transition-all font-inter text-black`}
                 />
                 {errors.password && (
-                  <span className="text-red-500 text-xs">
+                  <span id="password-error" className="text-red-500 text-xs" role="alert">
                     {errors.password.message as string}
                   </span>
                 )}
@@ -157,10 +163,12 @@ export default function SignInPage() {
                 <button
                   type="submit"
                   disabled={loading}
+                  aria-busy={loading}
+                  aria-disabled={loading}
                   className={`w-full h-[50px] bg-neutral-grey-800 hover:bg-black text-white font-inter font-semibold rounded-[10px] transition-all cursor-pointer transform active:scale-[0.98] ${loading ? "opacity-50 cursor-not-allowed" : ""
                     }`}
                 >
-                  {loading ? "Inscription..." : "S’inscrire"}
+                  {loading ? "Inscription en cours..." : "S’inscrire"}
                 </button>
               </div>
             </form>

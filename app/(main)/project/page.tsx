@@ -2,18 +2,23 @@
 
 import PageHero from "@/components/layout/PageHero";
 import ProjectCard from "@/components/project/projectCard";
-import { useProjectsWithTasks } from "@/hooks/useProjectsWithTasks";
+import { useProjects } from "@/hooks/useProjects";
+import Toast from "@/components/ui/Toast";
 
 export default function ProjectsPage() {
 
-  const { projects, loading, error } = useProjectsWithTasks();
+  const { projects, loading, error } = useProjects();
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div role="status" aria-live="polite" className="flex justify-center items-center min-h-[400px]">Chargement des projets...</div>;
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return (
+      <div role="alert" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+        <Toast type="error" message={`Erreur lors du chargement des projets : ${error}`} />
+      </div>
+    );
   }
 
   return (

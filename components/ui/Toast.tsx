@@ -8,7 +8,11 @@ export default function Toast({ type, message }: { type: "error" | "success" | "
     }
 
     return (
-        <div className={`w-full p-3 ${colors[type]} rounded text-sm`}>
+        <div 
+            role={type === "error" ? "alert" : "status"}
+            aria-live={type === "error" ? "assertive" : "polite"}
+            className={`w-full p-3 ${colors[type]} rounded text-sm`}
+        >
             {message}
         </div>
     )
