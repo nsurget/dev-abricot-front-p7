@@ -1,7 +1,7 @@
 "use client";
 
 import PageHero from "@/components/layout/PageHero";
-import ProjectCard from "@/components/project/projectCard";
+import ProjectCard from "@/components/project/ProjectCard";
 import { useProjects } from "@/hooks/useProjects";
 import Toast from "@/components/ui/Toast";
 

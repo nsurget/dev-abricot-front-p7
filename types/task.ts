@@ -10,6 +10,10 @@ export interface Task {
     creatorId: string;
     creator: User;
     projectId: string;
+    assignees: { user: User }[];
+    _count?: {
+        comments: number;
+    };
     createdAt: string;
     updatedAt: string;
 }

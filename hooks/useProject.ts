@@ -41,7 +41,7 @@ export function useProject(id: string) {
         return () => {
             controller.abort();
         };
-    }, []);
+    }, [ id ]);
 
     return { project, loading, error };
 }

@@ -4,7 +4,9 @@ import { useProject } from "@/hooks/useProject";
 import Toast from "@/components/ui/Toast";
 import { use } from "react";
 import PageHero from "@/components/layout/PageHero";
+import ProjectMembers from "@/components/project/ProjectMembers";
 import { useRouter } from "next/navigation";
+import ProjectTasks from "@/components/project/ProjectTasks";
 
 export default function ProjectSinglePage({
   params
@@ -41,6 +43,8 @@ export default function ProjectSinglePage({
                 }
               ]}
       />
+      {project && <ProjectMembers project={project} />}
+      {project && <ProjectTasks project={project} />}
     </div>
   );
 }

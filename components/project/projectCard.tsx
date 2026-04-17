@@ -14,6 +14,8 @@ export default function ProjectCard({ project }: { project: Project }) {
   const inProgressTasks = project.tasks?.filter(task => task.status === 'IN_PROGRESS').length || 0;
   const percentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
   const percentageInProgress = totalTasks > 0 ? Math.round(((inProgressTasks + completedTasks) / totalTasks) * 100) : 0;
+  const membersExcludingOwner = project.members.filter(m => m.user.id !== project.ownerId);
+  const teamMembersCount = membersExcludingOwner.length + 1;
 
   const handleCardClick = () => {
     router.push(`/project/${project.id}`);
@@ -85,7 +87,7 @@ export default function ProjectCard({ project }: { project: Project }) {
         <div className="flex gap-[8px] items-center text-[#6b7280]">
           <Account aria-hidden="true" />
           <p className="font-['Inter',sans-serif] font-normal text-[10px]">
-            Équipe ({project.members.length})
+            Équipe ({teamMembersCount}) 
           </p>
         </div>
         <div className="flex gap-[4px] items-center w-full">
@@ -94,12 +96,11 @@ export default function ProjectCard({ project }: { project: Project }) {
             <UserTag label="Propriétaire" />
           </div>
 
-          {project.members.length > 1 && (
+          {membersExcludingOwner.length > 0 && (
             <div className="flex items-center">
-              {project.members
-                .filter(m => m.user.id !== project.ownerId)
+              {membersExcludingOwner
                 .slice(0, 3)
-                .map((member, index) => (
+                .map((member) => (
                   <UserAvatar
                     key={member.id}
                     name={member.user.name}
@@ -107,12 +108,12 @@ export default function ProjectCard({ project }: { project: Project }) {
                     backgroundGrey={true}
                   />
                 ))}
-              {project.members.length > 4 && (
+              {membersExcludingOwner.length > 3 && (
                 <div 
                   className="bg-[#e5e7eb] flex items-center justify-center rounded-full shrink-0 border border-white -ml-2 w-[27px] h-[27px]"
-                  aria-label={`Et ${project.members.length - 4} autres membres`}
+                  aria-label={`Et ${membersExcludingOwner.length - 3} autres membres`}
                 >
-                  <span className="text-[10px] text-[#0f0f0f]" aria-hidden="true">+{project.members.length - 4}</span>
+                  <span className="text-[10px] text-[#0f0f0f]" aria-hidden="true">+{membersExcludingOwner.length - 3}</span>
                 </div>
               )}
             </div>

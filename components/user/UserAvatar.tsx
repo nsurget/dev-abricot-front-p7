@@ -23,7 +23,7 @@ export default function UserAvatar({ name, size = 27, className = "", background
   
   return (
     <div 
-      className={` ${backgroundGrey ? "bg-neutral-grey-200" : "bg-[#ffe8d9]"} flex flex-col items-center justify-center rounded-full shrink-0 border border-white ${className}`}
+      className={` ${backgroundGrey ? "bg-neutral-grey-200 border-white" : "bg-brand-orange-light border-brand-orange-light"} flex flex-col items-center justify-center rounded-full shrink-0 border  ${className}`}
       style={{ width: size, height: size }}
       aria-label={name}
       role="img"
