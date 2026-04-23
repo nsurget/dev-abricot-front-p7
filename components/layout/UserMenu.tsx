@@ -51,11 +51,12 @@ export function UserMenu({ className }: { className?: string }) {
     const initials = user.name
         ? user.name
             .split(" ")
+            .filter(Boolean)
             .map((n) => n[0])
             .join("")
             .toUpperCase()
             .slice(0, 2)
-        : "??";
+        : user.email[0].toUpperCase();
 
 
     return (
@@ -78,7 +79,9 @@ export function UserMenu({ className }: { className?: string }) {
                 }`}>
                 <div className="bg-white border border-gray-100 rounded-xl shadow-lg py-2 min-w-[200px]">
                     <div className="px-4 py-2 border-b border-gray-50 flex flex-col mb-1">
-                        <span className="text-sm font-semibold text-gray-900 truncate">{user.name}</span>
+                        <span className="text-sm font-semibold text-gray-900 truncate">
+                            {user.name || user.email.split("@")[0]}
+                        </span>
                         <span className="text-xs text-gray-500 truncate">{user.email}</span>
                     </div>
 

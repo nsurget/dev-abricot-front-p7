@@ -9,11 +9,9 @@ import Account from "@/components/icons/Account";
 export default function ProjectCard({ project }: { project: Project }) {
   const router = useRouter();
 
-  const totalTasks = project._count?.tasks || 0;
+  const totalTasks = project.tasks?.length || 0;
   const completedTasks = project.tasks?.filter(task => task.status === 'DONE').length || 0;
-  const inProgressTasks = project.tasks?.filter(task => task.status === 'IN_PROGRESS').length || 0;
   const percentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-  const percentageInProgress = totalTasks > 0 ? Math.round(((inProgressTasks + completedTasks) / totalTasks) * 100) : 0;
   const membersExcludingOwner = project.members.filter(m => m.user.id !== project.ownerId);
   const teamMembersCount = membersExcludingOwner.length + 1;
 
@@ -65,10 +63,6 @@ export default function ProjectCard({ project }: { project: Project }) {
                 <div
                   className="bg-[#d3590b] h-full rounded-[40px] transition-all duration-500"
                   style={{ width: `${percentage}%` }}
-                />
-                <div
-                  className="bg-blue h-full rounded-[40px] transition-all duration-500"
-                  style={{ width: `${percentageInProgress}%` }}
                 />
               </div>
               <p className="font-['Inter',sans-serif] font-normal text-[#6b7280] text-[10px]">

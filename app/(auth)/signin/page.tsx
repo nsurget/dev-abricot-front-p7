@@ -36,7 +36,7 @@ export default function SignInPage() {
         password: data.password,
       });
 
-      const { token, user } = response.data;
+      const { token, user } = response.data.data;
       login(token, user);
 
       router.push("/dashboard");

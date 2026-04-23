@@ -63,14 +63,17 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                                     {user.name
                                         ? user.name
                                             .split(" ")
+                                            .filter(Boolean)
                                             .map((n) => n[0])
                                             .join("")
                                             .toUpperCase()
                                             .slice(0, 2)
-                                        : "??"}
+                                        : user.email[0].toUpperCase()}
                                 </div>
                                 <div className="flex flex-col">
-                                    <span className="text-sm font-semibold text-gray-900 truncate">{user.name}</span>
+                                    <span className="text-sm font-semibold text-gray-900 truncate">
+                                        {user.name || user.email.split("@")[0]}
+                                    </span>
                                     <span className="text-xs text-gray-500 truncate">{user.email}</span>
                                 </div>
                             </div>
@@ -80,7 +83,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                     {/* Navigation Items */}
                     <nav className="flex flex-col gap-2">
                         {menuItems.map((item) => {
-                            const isActive = pathname === item.href;
+                            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
                             const Icon = item.icon;
 
                             return (

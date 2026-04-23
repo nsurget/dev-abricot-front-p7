@@ -3,15 +3,15 @@
 import React from "react";
 
 interface UserAvatarProps {
-  name: string;
+  name: string | null;
   size?: number;
   className?: string;
   backgroundGrey?: boolean;
 }
 
-export function getInitials(name: string) {
-  if (!name) return "";
-  const parts = name.split(" ");
+export function getInitials(name: string | null) {
+  if (!name) return "?";
+  const parts = name.split(" ").filter(Boolean);
   if (parts.length >= 2) {
     return (parts[0][0] + parts[1][0]).toUpperCase();
   }
@@ -25,7 +25,7 @@ export default function UserAvatar({ name, size = 27, className = "", background
     <div 
       className={` ${backgroundGrey ? "bg-neutral-grey-200 border-white" : "bg-brand-orange-light border-brand-orange-light"} flex flex-col items-center justify-center rounded-full shrink-0 border  ${className}`}
       style={{ width: size, height: size }}
-      aria-label={name}
+      aria-label={name || "Utilisateur"}
       role="img"
     >
       <p className="font-['Inter:Regular',sans-serif] font-normal leading-none text-[#0f0f0f] text-[10px] text-center tracking-[0.2px] uppercase whitespace-nowrap" aria-hidden="true">

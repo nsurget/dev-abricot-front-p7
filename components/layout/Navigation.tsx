@@ -25,7 +25,7 @@ export function Navigation({ className }: { className?: string }) {
         <nav className={className}>
             <ul className="flex gap-4">
                 {menuItems.map((item) => {
-                    const isActive = pathname === item.href;
+                    const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
                     const Icon = item.icon;
                     
                     return (

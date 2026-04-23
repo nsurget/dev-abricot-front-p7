@@ -13,8 +13,5 @@ export interface Project {
   createdAt: string;
   updatedAt: string;
   tasks: Task[];
-  _count: {
-    tasks: number;
-  };
 }
 
