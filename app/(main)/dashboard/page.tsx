@@ -2,11 +2,12 @@
 
 import PageHero from "@/components/layout/PageHero";
 import { useUserInfo } from "@/hooks/useUserInfo";
+import AssignedTasks from "@/components/dashboard/AssignedTasks";
 
 
 export default function DashboardPage() {
   const user = useUserInfo();
-  
+
   return (
     <div className="py-8">
           <PageHero
@@ -21,9 +22,7 @@ export default function DashboardPage() {
               }
             ]}
           />
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
-            <p>Contenu du tableau de bord</p>
-          </div>
+          <AssignedTasks />
         </div>
   );
 }

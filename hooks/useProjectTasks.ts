@@ -15,7 +15,6 @@ export function useProjectTasks(projectId: string) {
             const response = await axiosInstance.get(`/projects/${projectId}/tasks`, {
                 signal
             });
-            console.log(response.data.data.tasks);
             setTasks(response.data.data.tasks);
         } catch (err: unknown) {
             if (err instanceof AxiosError && err.code === 'ERR_CANCELED') {

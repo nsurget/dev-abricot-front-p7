@@ -14,7 +14,7 @@ export default function ProjectMembers({ project }: ProjectMembersProps) {
     const totalMembers = membersExcludingOwner.length + 1;
 
     return (
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-0 mb-8">
+        <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 md:px-6 xl:px-0 mb-8">
             <div className="bg-neutral-grey-100 rounded-[10px] px-6 md:px-[50px] py-5 md:py-[20px] flex flex-col md:flex-row md:items-center justify-between gap-6">
                 {/* Left side: Title and count */}
                 <div className="flex items-center gap-2 whitespace-nowrap">

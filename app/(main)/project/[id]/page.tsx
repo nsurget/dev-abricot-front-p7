@@ -34,7 +34,7 @@ export default function ProjectSinglePage({
               title={project?.name || ""}
               titleAction={() => alert("Modifier le projet")}
               subtitle={project?.description || ""}
-              onBack={() => router.push("/project")}
+              onBack={router.back}
               actions={[
                 {
                   label: "Créer une tâche",

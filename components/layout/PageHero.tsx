@@ -28,7 +28,7 @@ export default function PageHero({
 }: PageHeroProps) {
     
     return (
-        <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-0">
+        <div className="relative w-full max-w-7xl mx-auto px-2 sm:px-4 md:px-6 xl:px-0">
             {/* Desktop Back Button (outside container) */}
             {onBack && (
                 <div className="hidden 2xl:block absolute left-[-76px] top-1/2 -translate-y-1/2 hover:cursor-pointer">

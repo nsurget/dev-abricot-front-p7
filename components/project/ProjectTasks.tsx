@@ -45,7 +45,7 @@ function TaskCard({ task }: { task: Task }) {
     const status = statusMap[task.status] || statusMap.TODO;
 
     return (
-        <div className="bg-white border border-neutral-grey-200 rounded-[10px] p-6 md:px-[40px] md:py-[25px] flex flex-col gap-6 w-full">
+        <div className="bg-white border border-neutral-grey-200 rounded-[10px] p-3 md:p-4 md:px-[40px] md:py-[25px] flex flex-col gap-6 w-full">
             {/* Top Row: Title, Status, Description and More Button */}
             <div className="flex justify-between items-start gap-4">
                 <div className="flex flex-col gap-2">
@@ -211,7 +211,7 @@ export default function ProjectTasks({ project }: ProjectTasksProps) {
     }
 
     return (
-        <Container background={true} className="px-6 md:px-[59px] py-8 md:py-[40px] flex flex-col gap-10">
+        <Container background={true} className="px-4 md:px-[59px] py-5 md:py-[40px] flex flex-col gap-10">
             {/* Header */}
             <div className="flex flex-wrap gap-4 justify-between">
                 <div className="flex flex-col gap-2">
@@ -224,14 +224,14 @@ export default function ProjectTasks({ project }: ProjectTasksProps) {
                 </div>
 
                 {/* Filters and Search */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div className="flex flex-col sm:flex-row items-center w-full sm:w-auto gap-3 sm:gap-4 md:gap-6">
                     {/* Status Filter Dropdown */}
-                    <div className="relative">
+                    <div className="relative w-full sm:shrink-0 sm:w-auto">
                         <select
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value as FilterStatus)}
                             id="status-filter"
-                            className="appearance-none pl-7 w-full pr-12 py-4 border border-neutral-grey-200 rounded-xl font-inter text-[14px] text-neutral-grey-800 focus:outline-none focus:border-neutral-grey-400 transition-all cursor-pointer min-w-[140px]"
+                            className="appearance-none pl-4 w-full pr-10 py-2.5 md:py-4 border border-neutral-grey-200 rounded-xl font-inter text-[14px] text-neutral-grey-800 focus:outline-none focus:border-neutral-grey-400 transition-all cursor-pointer min-w-[120px] sm:min-w-[140px]"
                         >
                             {filterOptions.map((option) => (
                                 <option key={option.value} value={option.value}>
@@ -239,22 +239,22 @@ export default function ProjectTasks({ project }: ProjectTasksProps) {
                                 </option>
                             ))}
                         </select>
-                        <div className="absolute right-7 top-1/2 -translate-y-1/2 rotate-180 pointer-events-none text-neutral-grey-400">
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 rotate-180 pointer-events-none text-neutral-grey-400">
                             <ChevronDown className="w-4 h-4" />
                         </div>
                     </div>
 
                     {/* Search Bar */}
-                    <div className="relative group max-w-sm w-full">
+                    <div className="relative group w-full sm:flex-1 sm:w-[250px] md:w-[300px]">
                         <input
                             type="text"
                             placeholder="Rechercher une tâche..."
                             value={searchQuery}
                             id="search-task"
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-7 pr-14 py-4 bg-white border border-neutral-grey-200 rounded-xl font-inter text-[14px] text-neutral-grey-800 placeholder:text-neutral-grey-400 focus:outline-none focus:border-brand-orange focus:ring-1 focus:ring-brand-orange transition-all"
+                            className="w-full pl-4 pr-10 py-2.5 md:py-4  bg-white border border-neutral-grey-200 rounded-xl font-inter text-[14px] text-neutral-grey-800 placeholder:text-neutral-grey-400 focus:outline-none focus:border-brand-orange focus:ring-1 focus:ring-brand-orange transition-all"
                         />
-                        <div className="absolute right-7 top-1/2 -translate-y-1/2 text-neutral-grey-400 group-focus-within:text-brand-orange transition-colors">
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-grey-400 group-focus-within:text-brand-orange transition-colors">
                             <SearchIcon className="w-5 h-5" />
                         </div>
                     </div>

@@ -13,6 +13,9 @@ export interface Task {
     creatorId: string;
     creator: User;
     projectId: string;
+    project?: {
+        name: string;
+    };
     assignees: { user: User }[];
     comments: Comment[];
     _count?: {

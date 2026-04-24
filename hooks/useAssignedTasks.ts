@@ -1,11 +1,10 @@
-
 import axiosInstance from "@/lib/axios";
 import React from "react";
 import { AxiosError } from "axios";
-import { Project } from "@/types/project";
+import { Task } from "@/types/task";
 
-export function useProjects() {
-    const [projects, setProjects] = React.useState<Project[]>([]);
+export function useAssignedTasks() {
+    const [assignedTasks, setAssignedTasks] = React.useState<Task[]>([]);
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
 
@@ -17,11 +16,11 @@ export function useProjects() {
             setLoading(true);
             setError(null);
             try {
-                const response = await axiosInstance.get("/projects", {
+                const response = await axiosInstance.get("/dashboard/assigned-tasks", {
                     signal: controller.signal // 2. On passe le signal à axios
                 });
 
-                setProjects(response.data.data.projects);
+                setAssignedTasks(response.data.data.tasks);
             } catch (err: unknown) {
                 // On ignore l'erreur si c'est nous qui avons annulé la requête
                 if (err instanceof AxiosError && err.code === 'ERR_CANCELED') {
@@ -43,5 +42,5 @@ export function useProjects() {
         };
     }, []);
 
-    return { projects, loading, error };
+    return { assignedTasks, loading, error };
 }
