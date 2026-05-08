@@ -4,10 +4,12 @@ import PageHero from "@/components/layout/PageHero";
 import ProjectCard from "@/components/project/ProjectCard";
 import { useProjects } from "@/hooks/useProjects";
 import Toast from "@/components/ui/Toast";
+import { useProjectModalStore } from "@/store/projectModalStore";
 
 export default function ProjectsPage() {
 
   const { projects, loading, error } = useProjects();
+  const openModalProject = useProjectModalStore((state) => state.openModal);
 
   if (loading) {
     return <div role="status" aria-live="polite" className="flex justify-center items-center min-h-[400px]">Chargement des projets...</div>;
@@ -30,7 +32,7 @@ export default function ProjectsPage() {
           {
             label: "+ Créer un projet",
             variant: "secondary",
-            onClick: () => alert("Créer un projet")
+            onClick: () => openModalProject("create")
           }
         ]}
       />

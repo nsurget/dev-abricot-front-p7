@@ -3,10 +3,11 @@
 import PageHero from "@/components/layout/PageHero";
 import { useUserInfo } from "@/hooks/useUserInfo";
 import AssignedTasks from "@/components/dashboard/AssignedTasks";
-
+import { useProjectModalStore } from "@/store/projectModalStore";
 
 export default function DashboardPage() {
   const user = useUserInfo();
+  const openModalProject = useProjectModalStore((state) => state.openModal);
 
   return (
     <div className="py-8">
@@ -18,7 +19,7 @@ export default function DashboardPage() {
               {
                 label: "+ Créer un projet",
                 variant: "secondary",
-                onClick: () => alert("Créer un projet")
+                onClick: () => openModalProject("create")
               }
             ]}
           />

@@ -8,6 +8,8 @@ import ProjectMembers from "@/components/project/ProjectMembers";
 import { useRouter } from "next/navigation";
 import ProjectTasks from "@/components/project/ProjectTasks";
 
+import { useProjectModalStore } from "@/store/projectModalStore";
+
 export default function ProjectSinglePage({
   params
 }: {
@@ -16,6 +18,7 @@ export default function ProjectSinglePage({
   const { id } = use(params);
   const { project, loading, error } = useProject(id);
   const router = useRouter();
+  const openModal = useProjectModalStore((state) => state.openModal);
   
     if (loading) {
       return <div role="status" aria-live="polite" className="flex justify-center items-center min-h-[400px]">Chargement des projets...</div>;
@@ -28,16 +31,23 @@ export default function ProjectSinglePage({
         </div>
       );
     }
+
   return (
     <div className="py-8">
       <PageHero
               title={project?.name || ""}
-              titleAction={() => alert("Modifier le projet")}
+              titleAction={() => project && openModal('edit', {
+                id: project.id,
+                name: project.name,
+                description: project.description,
+                contributors: project.members?.map(m => m.user.email) || [],
+                members: project.members
+              })}
               subtitle={project?.description || ""}
               onBack={router.back}
               actions={[
                 {
-                  label: "Créer une tâche",
+                  label: "+ Créer une tâche",
                   variant: "secondary",
                   onClick: () => alert("Créer une tâche")
                 }

@@ -42,7 +42,7 @@ export default function LoginPage() {
 
       {/* Login Card Panel */}
       <section className="relative z-10 bg-neutral-grey-50 w-full max-w-[562px] min-h-screen flex flex-col items-center justify-between px-6 py-10 md:px-[100px] lg:px-[140px] md:py-[55px] shadow-2xl overflow-y-auto">
-        <div className="w-full flex flex-col items-center gap-[60px] md:gap-[150px] lg:gap-[202px]">
+        <div className="w-full flex flex-col items-center gap-[60px] md:gap-[130px] xxl:gap-[180px]">
           <Logo width={252} height={32} />
 
           <div className="w-full flex flex-col gap-[30px] items-center">

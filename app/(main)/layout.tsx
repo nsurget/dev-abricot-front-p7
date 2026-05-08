@@ -1,5 +1,6 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import ProjectModal from "@/components/project/ProjectModal";
 
 export default function MainLayout({
   children,
@@ -13,6 +14,9 @@ export default function MainLayout({
         {children}
       </main>
       <Footer />
+      
+      {/* Modale globale de projet */}
+      <ProjectModal />
     </div>
   );
 }
