@@ -12,7 +12,7 @@ export default function Header() {
 
     return (
         <header className="bg-white px-1  xl:px-[50px] 2xl:px-[100px] py-4 md:py-[8px] lg:py-[8px] flex items-center justify-between shadow-[0px_4px_12px_1px_rgba(0,0,0,0.02)] sticky top-0 z-[60]">
-            <Logo height={18} className="cursor-pointer md:w-40" />
+            <Logo height={18} className="cursor-pointer md:w-40 ml-2 xl:ml-0" />
 
             <Navigation className="hidden md:flex" />
             <UserMenu className="hidden md:flex" />

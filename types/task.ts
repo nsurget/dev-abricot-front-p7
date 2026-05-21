@@ -2,13 +2,14 @@ import { User } from "./user";
 import { Comment } from "./comment";
 
 export type TaskStatus = "TODO" | "IN_PROGRESS" | "DONE" | "CANCELLED";
+export type TaskPriority = "LOW" | "MEDIUM" | "HIGH" | "URGENT";
 
 export interface Task {
     id: string;
     title: string;
     description: string;
     dueDate: string;
-    priority: number;
+    priority: TaskPriority;
     status: TaskStatus;
     creatorId: string;
     creator: User;

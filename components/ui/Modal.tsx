@@ -45,11 +45,8 @@ export default function Modal({ isOpen, onClose, children }: ModalProps) {
       {/* Conteneur de la modale */}
       <div className={`
         relative bg-white shadow-2xl overflow-y-auto transition-all duration-300 ease-in-out
-        /* Desktop */
-        md:rounded-[10px] md:w-full md:max-w-[690px] md:max-h-[90vh] md:m-4
+        md:rounded-[10px] md:w-full md:max-w-[690px] md:max-h-[95vh] md:m-4
         ${mounted ? "md:opacity-100 md:scale-100" : "md:opacity-0 md:scale-95"}
-        
-        /* Mobile */
         max-md:fixed max-md:top-0 max-md:right-0 max-md:h-full max-md:w-full max-md:rounded-none
         ${mounted ? "max-md:translate-x-0" : "max-md:translate-x-full"}
       `}>

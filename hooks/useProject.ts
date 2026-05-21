@@ -2,11 +2,13 @@ import axiosInstance from "@/lib/axios";
 import React from "react";
 import { AxiosError } from "axios";
 import { Project } from "@/types/project";
+import { useProjectModalStore } from "@/store/projectModalStore";
 
 export function useProject(id: string) {
     const [project, setProject] = React.useState<Project | null>(null);
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
+    const refreshCounter = useProjectModalStore((state) => state.refreshCounter);
 
     React.useEffect(() => {
         // 1. Création d'un contrôleur pour annuler la requête
@@ -41,7 +43,7 @@ export function useProject(id: string) {
         return () => {
             controller.abort();
         };
-    }, [ id ]);
+    }, [ id, refreshCounter ]);
 
     return { project, loading, error };
 }

@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import axiosInstance from "@/lib/axios";
 import { AxiosError } from "axios";
 import React from "react";
-import Toast from "@/components/ui/Toast";
+import { useToastStore } from "@/store/toastStore";
 import { useAuthStore } from "@/store/authStore";
 
 interface ProfileFormData {
@@ -19,6 +19,7 @@ interface ProfileFormData {
 export default function MyAccountPage() {
 
     const user = useUserInfo();
+    const addToast = useToastStore((state) => state.addToast);
 
     const {
         register,
@@ -26,13 +27,10 @@ export default function MyAccountPage() {
         formState: { errors },
     } = useForm<ProfileFormData>();
 
-    const [error, setError] = React.useState<Array<string> | null>(null);
     const [loading, setLoading] = React.useState(false);
-    const [success, setSuccess] = React.useState<Array<string> | null>(null);
 
     const onSubmit = async (data: ProfileFormData) => {
         setLoading(true);
-        setError(null);
         try {
             const successMessages: Array<string> = [];
             
@@ -70,13 +68,13 @@ export default function MyAccountPage() {
                     successMessages.push(messagePassword);
                 }
             } else if (!data.currentPassword && data.newPassword) {
-                setError(["L'ancien mot de passe est requis"]);
+                addToast("error", "L'ancien mot de passe est requis");
             } else if (data.currentPassword && !data.newPassword) {
-                setError(["Le nouveau mot de passe est requis"]);
+                addToast("error", "Le nouveau mot de passe est requis");
             }
 
             if (successMessages.length > 0) {
-                setSuccess(successMessages);
+                successMessages.forEach(msg => addToast("success", msg));
 
                 window.scrollTo({
                     top: 0,
@@ -96,40 +94,17 @@ export default function MyAccountPage() {
                 } else {
                     messages.push("Erreur lors de la mise à jour du profil. Veuillez réessayer.");
                 }
-                setError(messages);
+                messages.forEach(msg => addToast("error", msg));
             } else {
-                setError(["Une erreur inattendue est survenue. Veuillez réessayer."]);
+                addToast("error", "Une erreur inattendue est survenue. Veuillez réessayer.");
             }
         } finally {
-            
-
-            
             setLoading(false);
         }
     };
 
     return (
         <div className="min-h-screen">
-
-            <div aria-live="polite" className="w-full">
-                {error && (
-                    <Container className="mt-5 mb-5">
-                        {error.map((message, index) => (
-                            <Toast key={index} type="error" message={message} />
-                        ))}
-                    </Container>
-                )}
-            </div>
-            <div aria-live="polite" className="w-full">
-                {success && (
-                    <Container className="mt-5 mb-5">
-                        {success.map((message, index) => (
-                            <Toast key={index} type="success" message={message} />
-                        ))}
-                    </Container>
-                )}
-            </div>
-
             <Container background={true}>
                 <h1 className="text-2xl font-bold mt-10">Mon compte</h1>
                 <p className="text-lg mt-3 text-gray-600">{user?.name}</p>

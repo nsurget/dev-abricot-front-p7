@@ -5,6 +5,8 @@ import Container from "../ui/Container";
 import { Project } from "@/types/project";
 import { useProjectTasks } from "@/hooks/useProjectTasks";
 import { Task, TaskStatus } from "@/types/task";
+import { statusMap, priorityMap, priorityOrder } from "@/types/task.constants";
+import { User } from "@/types/user";
 import UserAvatar from "@/components/user/UserAvatar";
 import UserTag from "@/components/user/UserTag";
 import CalendarIcon from "@/components/icons/Calendar";
@@ -26,12 +28,6 @@ const filterOptions: { label: string; value: FilterStatus }[] = [
     { label: "Terminée", value: "DONE" },
 ];
 
-const statusMap: Record<TaskStatus, { label: string; className: string; textClass: string }> = {
-    TODO: { label: "À faire", className: "bg-[#ffe0e0]", textClass: "text-[#ef4444]" },
-    IN_PROGRESS: { label: "En cours", className: "bg-[#fff0d7]", textClass: "text-[#e08d00]" },
-    DONE: { label: "Terminée", className: "bg-[#f1fff7]", textClass: "text-[#27ae60]" },
-    CANCELLED: { label: "Annulée", className: "bg-neutral-grey-200", textClass: "text-neutral-grey-600" },
-};
 
 const formatDate = (dateString: string) => {
     if (!dateString) return "";
@@ -39,10 +35,28 @@ const formatDate = (dateString: string) => {
     return date.toLocaleDateString("fr-FR", { day: "numeric", month: "long" });
 };
 
-function TaskCard({ task }: { task: Task }) {
+function TaskCard({ task, projectMembers }: { task: Task, projectMembers: User[] }) {
     const [isExpanded, setIsExpanded] = React.useState(false);
+    const [isMenuOpen, setIsMenuOpen] = React.useState(false);
     const currentUser = useUserInfo();
+    const openModal = useTaskModalStore((state) => state.openModal);
+    
     const status = statusMap[task.status] || statusMap.TODO;
+    const priority = priorityMap[task.priority] || priorityMap.MEDIUM;
+
+    const handleEdit = (e: React.MouseEvent) => {
+        e.stopPropagation();
+
+        // Le back renvoie les IDs dans task.assignees
+        // On adapte pour le store qui attend string[] (IDs)
+        const assigneeIds = task.assignees?.map(a => a.user.id) || [];
+        
+        openModal("edit", task.projectId, projectMembers, {
+            ...task,
+            assignees: assigneeIds
+        });
+        setIsMenuOpen(false);
+    };
 
     return (
         <div className="bg-white border border-neutral-grey-200 rounded-[10px] p-3 md:p-4 md:px-[40px] md:py-[25px] flex flex-col gap-6 w-full">
@@ -64,16 +78,40 @@ function TaskCard({ task }: { task: Task }) {
                     </p>
                 </div>
 
-                <button
-                    className="p-2 hover:bg-neutral-grey-50 rounded-lg border border-neutral-grey-200 text-neutral-grey-600 transition-colors"
-                    aria-label="Plus d'options"
-                >
-                    <DotsHorizontalIcon className="w-5 h-5" />
-                </button>
+                <div className="relative">
+                    <button
+                        onClick={() => setIsMenuOpen(!isMenuOpen)}
+                        className="p-2 hover:bg-neutral-grey-50 rounded-lg border border-neutral-grey-200 text-neutral-grey-600 transition-colors"
+                        aria-label="Plus d'options"
+                    >
+                        <DotsHorizontalIcon className="w-5 h-5" />
+                    </button>
+
+                    {isMenuOpen && (
+                        <>
+                            <div 
+                                className="fixed inset-0 z-10" 
+                                onClick={() => setIsMenuOpen(false)}
+                            />
+                            <div className="absolute right-0 mt-2 w-[150px] bg-white border border-neutral-grey-200 rounded-lg shadow-lg z-20 overflow-hidden">
+                                <button
+                                    onClick={handleEdit}
+                                    className="w-full px-4 py-3 text-left font-inter text-[14px] text-neutral-grey-700 hover:bg-neutral-grey-50 flex items-center gap-2 transition-colors"
+                                >
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                    </svg>
+                                    Modifier
+                                </button>
+                            </div>
+                        </>
+                    )}
+                </div>
             </div>
 
-            {/* Meta Section: Due Date and Assignees */}
-            <div className="flex flex-col flex-wrap gap-x-8 gap-y-4">
+            {/* Meta Section: Due Date, Priority and Assignees */}
+            <div className="flex flex-col md:flex-row md:items-center flex-wrap gap-x-8 gap-y-4">
                 {/* Due Date */}
                 <div className="flex items-center gap-1">
                     <span className="font-inter font-normal text-[12px] text-neutral-grey-600">
@@ -83,6 +121,18 @@ function TaskCard({ task }: { task: Task }) {
                         <CalendarIcon className="w-4 h-4 text-neutral-grey-800" />
                         <span className="font-inter font-normal text-[12px] text-neutral-grey-800">
                             {formatDate(task.dueDate)}
+                        </span>
+                    </div>
+                </div>
+
+                {/* Priority */}
+                <div className="flex items-center gap-1">
+                    <span className="font-inter font-normal text-[12px] text-neutral-grey-600">
+                        Priorité :
+                    </span>
+                    <div className="ml-1">
+                        <span className={`font-inter font-semibold text-[11px] ${priority.textClass} uppercase tracking-wider`}>
+                            {priority.label}
                         </span>
                     </div>
                 </div>
@@ -171,13 +221,28 @@ function TaskCard({ task }: { task: Task }) {
     );
 }
 
+import { useTaskModalStore } from "@/store/taskModalStore";
+
+
 export default function ProjectTasks({ project }: ProjectTasksProps) {
-    const { tasks, loading, error } = useProjectTasks(project.id);
+    const { tasks, loading, error, refresh } = useProjectTasks(project.id);
+    const refreshCounter = useTaskModalStore((state) => state.refreshCounter);
     const [statusFilter, setStatusFilter] = React.useState<FilterStatus>("ALL");
+    const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
     const [searchQuery, setSearchQuery] = React.useState("");
 
+    const currentFilterLabel = React.useMemo(() => {
+        return filterOptions.find(opt => opt.value === statusFilter)?.label || "Statut";
+    }, [statusFilter]);
+
+    React.useEffect(() => {
+        if (refreshCounter > 0) {
+            refresh();
+        }
+    }, [refreshCounter, refresh]);
+
     const filteredTasks = React.useMemo(() => {
-        return tasks.filter((task) => {
+        const result = tasks.filter((task) => {
             // Status Filter
             if (statusFilter !== "ALL" && task.status !== statusFilter) return false;
 
@@ -192,7 +257,20 @@ export default function ProjectTasks({ project }: ProjectTasksProps) {
 
             return inTitle || inDescription || inAssignees || inComments;
         });
+
+        // Tri par priorité (Urgent en premier)
+        return [...result].sort((a, b) => {
+            const orderA = priorityOrder[a.priority] || 0;
+            const orderB = priorityOrder[b.priority] || 0;
+            return orderB - orderA;
+        });
     }, [tasks, statusFilter, searchQuery]);
+
+    // Liste des membres pour la modale d'édition des tâches
+    const projectMembers = React.useMemo(() => [
+        project.owner,
+        ...(project.members?.map(m => m.user) || [])
+    ], [project]);
 
     if (loading) {
         return (
@@ -223,55 +301,79 @@ export default function ProjectTasks({ project }: ProjectTasksProps) {
                     </p>
                 </div>
 
-                {/* Filters and Search */}
-                <div className="flex flex-col sm:flex-row items-center w-full sm:w-auto gap-3 sm:gap-4 md:gap-6">
-                    {/* Status Filter Dropdown */}
-                    <div className="relative w-full sm:shrink-0 sm:w-auto">
-                        <select
-                            value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value as FilterStatus)}
-                            id="status-filter"
-                            className="appearance-none pl-4 w-full pr-10 py-2.5 md:py-4 border border-neutral-grey-200 rounded-xl font-inter text-[14px] text-neutral-grey-800 focus:outline-none focus:border-neutral-grey-400 transition-all cursor-pointer min-w-[120px] sm:min-w-[140px]"
-                        >
-                            {filterOptions.map((option) => (
-                                <option key={option.value} value={option.value}>
-                                    {option.label}
-                                </option>
-                            ))}
-                        </select>
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2 rotate-180 pointer-events-none text-neutral-grey-400">
-                            <ChevronDown className="w-4 h-4" />
-                        </div>
-                    </div>
-
-                    {/* Search Bar */}
-                    <div className="relative group w-full sm:flex-1 sm:w-[250px] md:w-[300px]">
-                        <input
-                            type="text"
-                            placeholder="Rechercher une tâche..."
-                            value={searchQuery}
-                            id="search-task"
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-4 pr-10 py-2.5 md:py-4  bg-white border border-neutral-grey-200 rounded-xl font-inter text-[14px] text-neutral-grey-800 placeholder:text-neutral-grey-400 focus:outline-none focus:border-brand-orange focus:ring-1 focus:ring-brand-orange transition-all"
+                {/* Filters */}
+            <div className="flex flex-col md:flex-row gap-6 justify-between items-start md:items-center w-full sm:w-auto">
+                <div className="relative w-full md:w-auto">
+                    <button
+                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                        className="flex items-center justify-between w-full md:w-[200px] h-[48px] px-6 bg-white border border-neutral-grey-200 rounded-[8px] transition-all hover:border-brand-orange group cursor-pointer "
+                    >
+                        <span className="font-inter text-[14px] text-neutral-grey-600 group-hover:text-neutral-grey-800">
+                            {statusFilter === "ALL" ? "Statut" : currentFilterLabel}
+                        </span>
+                        <ChevronDown
+                            className={`w-4 h-4 text-neutral-grey-400 duration-200 ${isDropdownOpen ? '' : 'rotate-x-180'}`}
                         />
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-grey-400 group-focus-within:text-brand-orange transition-colors">
-                            <SearchIcon className="w-5 h-5" />
-                        </div>
+                    </button>
+
+                    {isDropdownOpen && (
+                        <>
+                            <div 
+                                className="fixed inset-0 z-10" 
+                                onClick={() => setIsDropdownOpen(false)}
+                            />
+                            <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-neutral-grey-200 rounded-[8px] shadow-lg z-20 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-200">
+                                {filterOptions.map((opt) => (
+                                    <button
+                                        key={opt.value}
+                                        onClick={() => {
+                                            setStatusFilter(opt.value);
+                                            setIsDropdownOpen(false);
+                                        }}
+                                        className={`w-full px-6 py-3 text-left font-inter text-[14px] transition-colors ${
+                                            statusFilter === opt.value
+                                                ? "bg-neutral-grey-50 text-brand-orange font-semibold"
+                                                : "text-neutral-grey-600 hover:bg-neutral-grey-50 hover:text-neutral-grey-800"
+                                        }`}
+                                    >
+                                        {opt.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </>
+                    )}
+                </div>
+
+                <div className="relative group w-full md:w-[350px]">
+                    <input
+                        type="text"
+                        placeholder="Rechercher une tâche"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-10 pr-4 py-3 bg-white border border-neutral-grey-200 rounded-[8px] font-inter text-[14px] text-neutral-grey-800 placeholder:text-neutral-grey-400 focus:outline-none focus:border-brand-orange transition-all"
+                    />
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-grey-400 group-focus-within:text-brand-orange transition-colors">
+                        <SearchIcon className="w-4 h-4" />
                     </div>
                 </div>
             </div>
 
+                
+            </div>
+
+            
+
             {/* Task List */}
-            <div className="flex flex-col gap-4">
-                {filteredTasks.length > 0 ? (
+            <div className="flex flex-col gap-6">
+                {filteredTasks && filteredTasks.length > 0 ? (
                     filteredTasks.map((task) => (
-                        <TaskCard key={task.id} task={task} />
+                        <TaskCard key={task.id} task={task} projectMembers={projectMembers} />
                     ))
                 ) : (
-                    <div className="text-center py-12 bg-neutral-grey-50 rounded-xl border border-dashed border-neutral-grey-200 text-neutral-grey-600 italic">
-                        {searchQuery || statusFilter !== "ALL"
-                            ? "Aucune tâche ne correspond à vos critères."
-                            : "Aucune tâche pour le moment."}
+                    <div className="text-center py-12 bg-neutral-grey-50 rounded-xl border border-dashed border-neutral-grey-200 text-neutral-grey-400 italic">
+                        {searchQuery 
+                            ? "Aucune tâche ne correspond à votre recherche."
+                            : "Aucune tâche dans cette catégorie pour le moment."}
                     </div>
                 )}
             </div>

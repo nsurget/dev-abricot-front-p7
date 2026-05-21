@@ -4,12 +4,14 @@ import React, { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
-import { useProjectModalStore } from "@/store/projectModalStore";
 import Toast from "@/components/ui/Toast";
+import { useProjectModalStore } from "@/store/projectModalStore";
 import AsyncSelect from "react-select/async";
 import axiosInstance from "@/lib/axios";
 import { User } from "@/types/user";
 import { useRouter } from "next/navigation";
+import { useUserInfo } from "@/hooks/useUserInfo";
+import { AxiosError } from "axios";
 
 interface Option {
   value: string;
@@ -22,15 +24,19 @@ interface ProjectFormValues {
   contributors: Option[];
 }
 
+import { useToastStore } from "@/store/toastStore";
+
 /**
  * Modale de création et d'édition de projet.
  * Utilise React Hook Form pour la gestion du formulaire.
  */
 export default function ProjectModal() {
+  const user = useUserInfo();
   // Récupération de l'état global du store
-  const { isOpen, mode, closeModal, projectData } = useProjectModalStore();
+  const { isOpen, mode, closeModal, projectData, triggerRefresh } = useProjectModalStore();
   const [loading, setLoading] = useState(false);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const addToast = useToastStore((state) => state.addToast);
   const router = useRouter();
 
   // Initialisation du formulaire
@@ -51,11 +57,15 @@ export default function ProjectModal() {
   // Mettre à jour les valeurs du formulaire quand projectData change
   React.useEffect(() => {
     if (isOpen) {
+      setError(null);
       if (mode === "edit" && projectData) {
+        const ownerEmail = projectData.ownerEmail || user?.email;
         reset({
           name: projectData.name,
           description: projectData.description,
-          contributors: projectData.contributors?.map(email => ({ value: email, label: email })) || [],
+          contributors: projectData.contributors
+            ?.filter(email => email !== ownerEmail)
+            .map(email => ({ value: email, label: email })) || [],
         });
       } else {
         reset({
@@ -65,7 +75,7 @@ export default function ProjectModal() {
         });
       }
     }
-  }, [projectData, isOpen, reset, mode]);
+  }, [projectData, isOpen, reset, mode, user?.email]);
 
   // Action de recherche des utilisateurs
   const loadOptions = async (inputValue: string) => {
@@ -74,11 +84,17 @@ export default function ProjectModal() {
     try {
       const response = await axiosInstance.get(`/users/search?query=${inputValue}`);
       const users = response.data.data.users;
-      
-      return users.map((user: User) => ({
-        value: user.email,
-        label: user.name ? `${user.name} (${user.email})` : user.email,
-      }));
+      // On masque le créateur (si on édite) ou l'utilisateur actuel (si on crée)
+      // pour éviter qu'il ne s'ajoute lui-même en tant que contributeur externe
+      return users
+        .filter((u: User) => {
+          const isOwner = projectData?.ownerEmail ? u.email === projectData.ownerEmail : u.id === user?.id;
+          return !isOwner;
+        })
+        .map((user: User) => ({
+          value: user.email,
+          label: user.name ? `${user.name} (${user.email})` : user.email,
+        }));
     } catch (error) {
       console.error("Erreur lors de la recherche d'utilisateurs:", error);
       return [];
@@ -93,16 +109,14 @@ export default function ProjectModal() {
       setLoading(true);
       try {
         await axiosInstance.delete(`/projects/${projectData.id}`);
-        setToastMessage("Projet supprimé !");
-        setTimeout(() => {
-          setToastMessage(null);
-          closeModal();
-          router.push("/project");
-          router.refresh();
-        }, 1500);
+        addToast("error", "Projet supprimé !");
+        triggerRefresh();
+        closeModal();
+        router.push("/project");
+        router.refresh();
       } catch (error) {
         console.error("Erreur lors de la suppression du projet:", error);
-        setToastMessage("Erreur lors de la suppression du projet");
+        addToast("error", "Erreur lors de la suppression du projet");
       } finally {
         setLoading(false);
       }
@@ -120,8 +134,18 @@ export default function ProjectModal() {
           description: data.description,
           contributors: data.contributors.map(opt => opt.value)
         };
-        await axiosInstance.post(`/projects`, payload);
-        setToastMessage("Projet créé avec succès !");
+        const response = await axiosInstance.post(`/projects`, payload);
+        const newProject = response.data.data.project;
+        addToast("success", "Projet créé avec succès !");
+        
+        reset();
+        closeModal();
+        triggerRefresh();
+        if (newProject?.id) {
+          router.push(`/project/${newProject.id}`);
+        } else {
+          router.push(`/project`);
+        }
       } else {
         const projectId = projectData?.id;
         if (!projectId) return;
@@ -149,25 +173,25 @@ export default function ProjectModal() {
           // Trouver l'ID utilisateur correspondant à l'email
           const member = projectData.members?.find(m => m.user.email === email);
           if (member) {
+            // Empêcher le propriétaire de se retirer (le backend le bloque de toute façon)
+            if (member.user.id === projectData.ownerId) {
+              console.warn("Le propriétaire ne peut pas être retiré de la liste des contributeurs.");
+              continue;
+            }
             await axiosInstance.delete(`/projects/${projectId}/contributors/${member.user.id}`);
           }
         }
 
-        setToastMessage("Projet modifié !");
-      }
-      
-      setTimeout(() => {
-        setToastMessage(null);
+        addToast("success", "Projet modifié !");
         reset();
         closeModal();
+        triggerRefresh();
         router.refresh();
-        if (mode === 'create') {
-          router.push(`/project`);
-        }
-      }, 2000);
-    } catch (error) {
-      console.error("Erreur lors de la création ou de la modification du projet:", error);
-      setToastMessage("Erreur lors de la création ou de la modification du projet");
+      }
+    } catch (err: unknown) {
+      console.error("Erreur lors de la création ou de la modification du projet:", err);
+      const message = err instanceof AxiosError ? err.response?.data?.message : undefined;
+      setError(message || "Erreur lors de la création ou de la modification du projet");
     } finally {
       setLoading(false);
     }
@@ -175,11 +199,11 @@ export default function ProjectModal() {
 
   return (
     <Modal isOpen={isOpen} onClose={closeModal}>
-      <div className="p-[24px] md:p-[70px] relative">
+      <div className="p-[24px] md:p-[50px] 2xl:p-[70px] relative">
         {/* Bouton de fermeture (X) */}
         <button 
           onClick={closeModal}
-          className="absolute top-[24px] right-[24px] md:top-[37px] md:right-[73px] text-[#9CA3AF] hover:text-brand-orange transition-colors cursor-pointer z-10"
+          className="absolute top-[24px] right-[24px] md:top-[47px] md:right-[47px] xl:top-[67px] xl:right-[67px] text-[#9CA3AF] hover:text-brand-orange transition-colors cursor-pointer z-10"
         >
           <svg width="20" height="20" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" className="md:w-[14px] md:h-[14px]">
             <path d="M13 1L1 13M1 1L13 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
@@ -190,6 +214,12 @@ export default function ProjectModal() {
         <h2 className="font-manrope font-semibold text-[24px] text-[#1F1F1F] mb-[32px] md:mb-[40px] pr-[40px]">
           {mode === "create" ? "Créer un projet" : "Modifier le projet"}
         </h2>
+
+        {error && (
+          <div className="mb-6">
+            <Toast type="error" message={error} />
+          </div>
+        )}
 
         {/* Formulaire */}
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-[24px]">
@@ -222,6 +252,20 @@ export default function ProjectModal() {
             {errors.description && <span className="text-red-500 text-xs">{errors.description.message}</span>}
           </div>
 
+          {/* Champ Créateur (Readonly) */}
+          {mode === "edit" && projectData?.ownerEmail && (
+            <div className="flex flex-col gap-[7px]">
+              <label className="font-inter text-[14px] text-black">Créateur</label>
+              <input
+                type="text"
+                value={projectData.ownerEmail}
+                readOnly
+                className="h-[53px] px-[17px] border border-[#E5E7EB] rounded-[4px] bg-gray-50 text-gray-500 cursor-not-allowed"
+              />
+              <p className="text-[12px] text-gray-400">Le créateur est automatiquement membre du projet.</p>
+            </div>
+          )}
+
           {/* Champ Contributeurs (Auto-complete) */}
           <div className="flex flex-col gap-[7px]">
             <label className="font-inter text-[14px] text-black">Contributeurs</label>
@@ -247,15 +291,16 @@ export default function ProjectModal() {
             />
           </div>
 
-          {/* Toast de succès */}
-          {toastMessage && (
-            <div className="mt-4">
-              <Toast type="success" message={toastMessage} />
-            </div>
-          )}
-
           {/* Boutons d'action */}
           <div className="mt-[32px] flex flex-col md:flex-row gap-4 justify-between items-center">
+            <Button 
+              type="submit" 
+              disabled={loading}
+              className="w-full md:w-[181px]"
+            >
+              {loading ? "Envoi..." : mode === "create" ? "Ajouter un projet" : "Enregistrer"}
+            </Button>
+
             {mode === "edit" && (
               <Button 
                 type="button"
@@ -267,13 +312,6 @@ export default function ProjectModal() {
                 Supprimer le projet
               </Button>
             )}
-            <Button 
-              type="submit" 
-              disabled={loading}
-              className="w-full md:w-[181px] md:ml-auto"
-            >
-              {loading ? "Envoi..." : mode === "create" ? "Ajouter un projet" : "Enregistrer"}
-            </Button>
           </div>
         </form>
       </div>

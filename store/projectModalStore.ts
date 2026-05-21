@@ -7,6 +7,8 @@ interface ProjectData {
   id: string;
   name: string;
   description: string;
+  ownerId?: string;
+  ownerEmail?: string;
   contributors?: string[];
   members?: { id: string, user: { id: string, email: string } }[];
 }
@@ -20,6 +22,8 @@ interface ProjectModalState {
   projectData: ProjectData | null;
   openModal: (mode: 'create' | 'edit', data?: ProjectData) => void;
   closeModal: () => void;
+  refreshCounter: number;
+  triggerRefresh: () => void;
 }
 
 /**
@@ -29,6 +33,7 @@ export const useProjectModalStore = create<ProjectModalState>((set) => ({
   isOpen: false,
   mode: 'create',
   projectData: null,
+  refreshCounter: 0,
 
   openModal: (mode, data) => set({ 
     isOpen: true, 
@@ -40,4 +45,6 @@ export const useProjectModalStore = create<ProjectModalState>((set) => ({
     isOpen: false, 
     projectData: null 
   }),
+
+  triggerRefresh: () => set((state) => ({ refreshCounter: state.refreshCounter + 1 })),
 }));
