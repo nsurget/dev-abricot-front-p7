@@ -21,7 +21,6 @@ export function useProject(id: string) {
                 const response = await axiosInstance.get("/projects/" + id, {
                     signal: controller.signal
                 });
-                console.log(response.data.data.project);
 
                 setProject(response.data.data.project);
             } catch (err: unknown) {

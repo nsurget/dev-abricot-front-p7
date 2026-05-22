@@ -16,6 +16,12 @@ export default function AssignedTasks() {
     const [searchQuery, setSearchQuery] = React.useState("");
     const [viewMode, setViewMode] = React.useState<"list" | "kanban">("list");
 
+    React.useEffect(() => {
+        if (viewMode === "kanban") {
+            setSearchQuery("");
+        }
+    }, [viewMode]);
+
     const filteredTasks = React.useMemo(() => {
         const result = assignedTasks.filter((task) => {
             if (!searchQuery.trim()) return true;

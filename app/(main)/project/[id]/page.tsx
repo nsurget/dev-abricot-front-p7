@@ -9,8 +9,9 @@ import ProjectTasks from "@/components/project/ProjectTasks";
 
 import { useProjectModalStore } from "@/store/projectModalStore";
 import { useTaskModalStore } from "@/store/taskModalStore";
+import { useAiTaskModalStore } from "@/store/aiTaskModalStore";
 import { useToastStore } from "@/store/toastStore";
-import Button from "@/components/ui/Button";
+import StarIcon from "@/components/icons/StarIcon";
 
 export default function ProjectSinglePage({
   params
@@ -22,6 +23,7 @@ export default function ProjectSinglePage({
   const router = useRouter();
   const openProjectModal = useProjectModalStore((state) => state.openModal);
   const openTaskModal = useTaskModalStore((state) => state.openModal);
+  const openAiTaskModal = useAiTaskModalStore((state) => state.openModal);
   const addToast = useToastStore((state) => state.addToast);
 
   // Utiliser useEffect pour afficher l'erreur si elle existe
@@ -30,6 +32,28 @@ export default function ProjectSinglePage({
       addToast("error", `Erreur lors du chargement du projet : ${error}`);
     }
   }, [error, addToast]);
+
+  const getUniqueMembers = React.useCallback(() => {
+    if (!project) return [];
+    const membersMap = new Map<string, { id: string; name: string; email: string }>();
+    if (project.owner) {
+      membersMap.set(project.owner.id, {
+        id: project.owner.id,
+        name: project.owner.name || "",
+        email: project.owner.email
+      });
+    }
+    project.members?.forEach(m => {
+      if (m.user) {
+        membersMap.set(m.user.id, {
+          id: m.user.id,
+          name: m.user.name || "",
+          email: m.user.email
+        });
+      }
+    });
+    return Array.from(membersMap.values());
+  }, [project]);
   
     if (loading) {
       return <div role="status" aria-live="polite" className="flex justify-center items-center min-h-[400px]">Chargement des projets...</div>;
@@ -99,19 +123,22 @@ export default function ProjectSinglePage({
                   variant: "secondary",
                   onClick: () => {
                     if (project) {
-                      const members = [
-                        { id: project.owner.id, name: project.owner.name, email: project.owner.email },
-                        ...(project.members?.map(m => ({ 
-                          id: m.user.id, 
-                          name: m.user.name, 
-                          email: m.user.email 
-                        })) || [])
-                      ];
-                      openTaskModal('create', project.id, members);
+                      openTaskModal('create', project.id, getUniqueMembers());
+                    }
+                  }
+                },
+                {
+                  label: "IA",
+                  icon: <StarIcon className="w-5 h-5" />,
+                  variant: "primary",
+                  onClick: () => {
+                    if (project) {
+                      openAiTaskModal(project.id, getUniqueMembers());
                     }
                   }
                 }
-              ]}
+              ]
+            }
       />
       {project && <ProjectMembers project={project} />}
       {project && <ProjectTasks project={project} />}

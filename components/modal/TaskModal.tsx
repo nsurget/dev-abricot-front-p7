@@ -231,6 +231,11 @@ export default function TaskModal() {
                   placeholder="Choisir parmi les membres du projet"
                   className="react-select-container"
                   classNamePrefix="react-select"
+                  // to fix the menuPortal overlay issue
+                  menuPortalTarget={typeof window !== "undefined" ? document.body : null}
+                  styles={{
+                    menuPortal: (base) => ({ ...base, zIndex: 9999 })
+                  }}
                 />
               )}
             />
@@ -280,7 +285,7 @@ export default function TaskModal() {
             <Button 
               type="submit" 
               disabled={loading}
-              className="w-full md:w-[181px]"
+              className="w-full md:w-auto"
             >
               {loading ? "Envoi..." : mode === "create" ? "+ Ajouter une tâche" : "Enregistrer"}
             </Button>

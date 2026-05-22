@@ -8,8 +8,8 @@ export function useProjectTasks(projectId: string) {
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
 
-    const fetchTasks = React.useCallback(async (signal?: AbortSignal) => {
-        setLoading(true);
+    const fetchTasks = React.useCallback(async (signal?: AbortSignal, silent = false) => {
+        if (!silent) setLoading(true);
         setError(null);
         try {
             const response = await axiosInstance.get(`/projects/${projectId}/tasks`, {
@@ -23,7 +23,7 @@ export function useProjectTasks(projectId: string) {
             const message = err instanceof AxiosError ? err.response?.data?.message : undefined;
             setError(message || "Erreur lors de la récupération des tâches.");
         } finally {
-            setLoading(false);
+            if (!silent) setLoading(false);
         }
     }, [projectId]);
 
@@ -37,5 +37,9 @@ export function useProjectTasks(projectId: string) {
         };
     }, [projectId, fetchTasks]);
 
-    return { tasks, loading, error, refresh: fetchTasks };
+    const refresh = React.useCallback((silent = false) => {
+        fetchTasks(undefined, silent);
+    }, [fetchTasks]);
+
+    return { tasks, loading, error, refresh };
 }

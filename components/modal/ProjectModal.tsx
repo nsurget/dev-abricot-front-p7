@@ -129,10 +129,14 @@ export default function ProjectModal() {
 
     try {
       if (mode === 'create') {
+        const contributorEmails = data.contributors.map(opt => opt.value);
+        if (user?.email && !contributorEmails.includes(user.email)) {
+          contributorEmails.push(user.email);
+        }
         const payload = {
           name: data.name,
           description: data.description,
-          contributors: data.contributors.map(opt => opt.value)
+          contributors: contributorEmails
         };
         const response = await axiosInstance.post(`/projects`, payload);
         const newProject = response.data.data.project;
@@ -286,6 +290,11 @@ export default function ProjectModal() {
                       : "Aucun utilisateur trouvé"
                   }
                   loadingMessage={() => "Recherche en cours..."}
+                  // to fix the menuPortal overlay issue
+                  menuPortalTarget={typeof window !== "undefined" ? document.body : null}
+                  styles={{
+                    menuPortal: (base) => ({ ...base, zIndex: 9999 })
+                  }}
                 />
               )}
             />
@@ -296,7 +305,7 @@ export default function ProjectModal() {
             <Button 
               type="submit" 
               disabled={loading}
-              className="w-full md:w-[181px]"
+              className="w-full md:w-auto"
             >
               {loading ? "Envoi..." : mode === "create" ? "Ajouter un projet" : "Enregistrer"}
             </Button>
