@@ -99,7 +99,7 @@ export default function AiTaskModal() {
         throw new Error(data.error || "Une erreur est survenue lors de la génération.");
       }
 
-      const generated: any[] = data.tasks;
+      const generated: Partial<GeneratedTask>[] = data.tasks;
       const formatted: GeneratedTask[] = generated.map((t, idx) => ({
         tempId: `${Date.now()}-${idx}-${Math.random().toString(36).substr(2, 9)}`,
         title: t.title || "Tâche générée sans nom",
@@ -114,9 +114,10 @@ export default function AiTaskModal() {
       setTasks((prev) => [...prev, ...formatted]);
       setPromptInput("");
       addToast("success", `${formatted.length} tâche(s) générée(s) avec succès !`);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      setError(err.message || "Impossible de générer les tâches. Veuillez réessayer.");
+      const errorMessage = err instanceof Error ? err.message : "Impossible de générer les tâches. Veuillez réessayer.";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -175,7 +176,11 @@ export default function AiTaskModal() {
     );
   };
 
-  const updateTaskField = (tempId: string, field: keyof GeneratedTask, value: any) => {
+  const updateTaskField = <K extends keyof GeneratedTask>(
+    tempId: string,
+    field: K,
+    value: GeneratedTask[K]
+  ) => {
     setTasks((prev) =>
       prev.map((t) => (t.tempId === tempId ? { ...t, [field]: value } : t))
     );
@@ -224,10 +229,10 @@ export default function AiTaskModal() {
                 <StarIcon className="w-7 h-7 fill-brand-orange text-brand-orange" />
               </div>
               <h3 className="font-manrope text-base font-semibold text-neutral-grey-800 mb-2">
-                Générez des tâches instantanément avec l'IA
+                {"Générez des tâches instantanément avec l'IA"}
               </h3>
               <p className="text-neutral-grey-600 text-sm max-w-sm leading-relaxed">
-                Décrivez simplement ce que vous souhaitez réaliser dans l'input ci-dessous.
+                {"Décrivez simplement ce que vous souhaitez réaliser dans l'input ci-dessous."}
               </p>
             </div>
           )}
@@ -269,7 +274,7 @@ export default function AiTaskModal() {
                         <label className="text-xs font-semibold text-neutral-grey-600">Priorité</label>
                         <select
                           value={task.priority}
-                          onChange={(e) => updateTaskField(task.tempId, "priority", e.target.value)}
+                          onChange={(e) => updateTaskField(task.tempId, "priority", e.target.value as GeneratedTask['priority'])}
                           className="px-2.5 py-1.5 border border-[#e5e7eb] rounded-[6px] text-xs bg-white focus:outline-none focus:ring-1 focus:ring-brand-orange"
                         >
                           {priorityOptions.map(opt => (
@@ -282,7 +287,7 @@ export default function AiTaskModal() {
                         <label className="text-xs font-semibold text-neutral-grey-600">Statut</label>
                         <select
                           value={task.status}
-                          onChange={(e) => updateTaskField(task.tempId, "status", e.target.value)}
+                          onChange={(e) => updateTaskField(task.tempId, "status", e.target.value as GeneratedTask['status'])}
                           className="px-2.5 py-1.5 border border-[#e5e7eb] rounded-[6px] text-xs bg-white focus:outline-none focus:ring-1 focus:ring-brand-orange"
                         >
                           {statusOptions.map(opt => (
@@ -470,7 +475,7 @@ export default function AiTaskModal() {
                   Génération des tâches en cours...
                 </p>
                 <p className="text-xs text-neutral-grey-400">
-                  L'intelligence artificielle analyse votre demande
+                  {"L'intelligence artificielle analyse votre demande"}
                 </p>
               </div>
             </div>

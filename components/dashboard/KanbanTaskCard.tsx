@@ -3,7 +3,7 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { Task } from "@/types/task";
-import { statusMap, priorityMap } from "@/types/task.constants";
+import { statusMap } from "@/types/task.constants";
 import CalendarIcon from "@/components/icons/Calendar";
 import MessageCircle from "@/components/icons/MessageCircle";
 import { MenuProjectsIcon } from "@/components/icons/MenuProjectsIcon";
@@ -17,7 +17,6 @@ interface KanbanTaskCardProps {
 export default function KanbanTaskCard({ task }: KanbanTaskCardProps) {
     const router = useRouter();
     const status = statusMap[task.status] || statusMap.TODO;
-    const priority = priorityMap[task.priority] || priorityMap.MEDIUM;
 
     return (
         <div className="bg-white border border-neutral-grey-200 rounded-[10px] p-6 flex flex-col gap-8 w-full hover:shadow-sm transition-shadow">

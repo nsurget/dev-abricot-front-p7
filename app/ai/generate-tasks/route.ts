@@ -111,10 +111,11 @@ Règles importantes :
     }
 
     return NextResponse.json({ success: true, tasks: parsedTasks });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Internal Server Error in generate-tasks route:", error);
+    const errorMessage = error instanceof Error ? error.message : "Une erreur interne est survenue.";
     return NextResponse.json(
-      { success: false, error: error.message || "Une erreur interne est survenue." },
+      { success: false, error: errorMessage },
       { status: 500 }
     );
   }
