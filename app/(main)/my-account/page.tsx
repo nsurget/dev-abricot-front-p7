@@ -117,7 +117,7 @@ export default function MyAccountPage() {
                         <input
                             type="text"
                             id="name"
-                            defaultValue={user?.name}
+                            defaultValue={user?.name ?? undefined}
                             aria-invalid={errors.name ? "true" : "false"}
                             aria-describedby={errors.name ? "name-error" : undefined}
                             {...register("name", {

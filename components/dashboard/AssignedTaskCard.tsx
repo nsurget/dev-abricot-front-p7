@@ -27,11 +27,9 @@ export default function AssignedTaskCard({ task }: AssignedTaskCardProps) {
                         <h3 className="font-manrope font-semibold text-[18px] text-[#1f1f1f] leading-none">
                             {task.title}
                         </h3>
-                        <div className={`${priority.className} ${priority.className ? "px-3 py-0.5 rounded-[50px]" : ""}`}>
-                            <span className={`font-inter font-semibold text-[10px] ${priority.textClass} uppercase tracking-wider`}>
-                                {priority.label}
-                            </span>
-                        </div>
+                        <span className={`font-inter font-semibold text-[10px] ${priority.textClass} uppercase tracking-wider`}>
+                            {priority.label}
+                        </span>
                     </div>
                     <p className="font-inter font-normal text-[14px] text-neutral-grey-600">
                         {task.description}
