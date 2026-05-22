@@ -209,11 +209,6 @@ export default function AiTaskModal() {
           <div className="mb-4 p-3.5 bg-red-50 border border-red-200 text-red-700 text-sm rounded-[8px] flex flex-col gap-1.5 animate-in fade-in slide-in-from-top-1">
             <span className="font-semibold">Une erreur est survenue :</span>
             <span>{error}</span>
-            {error.includes("GEMINI_API_KEY") && (
-              <span className="text-xs text-red-600 mt-1 italic font-medium">
-                Veuillez ajouter GEMINI_API_KEY="votre_clé" dans le fichier dev-abricot-front-p7/.env.local puis redémarrer le projet front.
-              </span>
-            )}
           </div>
         )}
 

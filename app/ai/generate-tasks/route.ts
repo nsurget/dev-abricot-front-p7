@@ -16,7 +16,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { 
           success: false, 
-          error: "La clé API Gemini (GEMINI_API_KEY) n'est pas configurée dans le fichier .env.local du frontend." 
+          error: "La clé API Gemini (GEMINI_API_KEY) n'est pas configurée" 
         },
         { status: 500 }
       );
