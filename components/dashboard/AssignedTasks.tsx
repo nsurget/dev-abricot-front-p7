@@ -122,6 +122,7 @@ export default function AssignedTasks() {
                         <div className="relative group max-w-sm w-full shrink-0">
                             <input
                                 type="text"
+                                aria-label="Rechercher une tâche"
                                 placeholder="Rechercher une tâche"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}

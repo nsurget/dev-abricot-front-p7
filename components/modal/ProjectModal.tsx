@@ -207,6 +207,7 @@ export default function ProjectModal() {
         {/* Bouton de fermeture (X) */}
         <button 
           onClick={closeModal}
+          aria-label="Fermer la boîte de dialogue d'édition de projet"
           className="absolute top-[24px] right-[24px] md:top-[47px] md:right-[47px] xl:top-[67px] xl:right-[67px] text-[#9CA3AF] hover:text-brand-orange transition-colors cursor-pointer z-10"
         >
           <svg width="20" height="20" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" className="md:w-[14px] md:h-[14px]">
@@ -229,8 +230,9 @@ export default function ProjectModal() {
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-[24px]">
           {/* Champ Nom (Titre) */}
           <div className="flex flex-col gap-[7px]">
-            <label className="font-inter text-[14px] text-black">Titre*</label>
+            <label htmlFor="project-title" className="font-inter text-[14px] text-black">Titre*</label>
             <input
+              id="project-title"
               {...register("name", { 
                 required: "Le titre est requis",
                 minLength: { value: 2, message: "Le titre doit faire au moins 2 caractères" },
@@ -244,8 +246,9 @@ export default function ProjectModal() {
 
           {/* Champ Description */}
           <div className="flex flex-col gap-[7px]">
-            <label className="font-inter text-[14px] text-black">Description*</label>
+            <label htmlFor="project-desc" className="font-inter text-[14px] text-black">Description*</label>
             <textarea
+              id="project-desc"
               {...register("description", { 
                 required: "La description est requise",
                 maxLength: { value: 500, message: "La description ne peut pas dépasser 500 caractères" }
@@ -259,8 +262,9 @@ export default function ProjectModal() {
           {/* Champ Créateur (Readonly) */}
           {mode === "edit" && projectData?.ownerEmail && (
             <div className="flex flex-col gap-[7px]">
-              <label className="font-inter text-[14px] text-black">Créateur</label>
+              <label htmlFor="project-owner" className="font-inter text-[14px] text-black">Créateur</label>
               <input
+                id="project-owner"
                 type="text"
                 value={projectData.ownerEmail}
                 readOnly
@@ -272,13 +276,14 @@ export default function ProjectModal() {
 
           {/* Champ Contributeurs (Auto-complete) */}
           <div className="flex flex-col gap-[7px]">
-            <label className="font-inter text-[14px] text-black">Contributeurs</label>
+            <label htmlFor="project-contributors" className="font-inter text-[14px] text-black">Contributeurs</label>
             <Controller
               name="contributors"
               control={control}
               render={({ field }) => (
                 <AsyncSelect
                   {...field}
+                  inputId="project-contributors"
                   isMulti
                   cacheOptions
                   defaultOptions

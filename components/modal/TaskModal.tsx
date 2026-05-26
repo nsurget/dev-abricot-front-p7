@@ -169,6 +169,7 @@ export default function TaskModal() {
       <div className="p-[24px] md:p-[50px]  relative">
         <button 
           onClick={closeModal}
+          aria-label="Fermer la boîte de dialogue d'édition de tâche"
           className="absolute top-[35px] right-[25px] md:top-[60px] md:right-[60px] text-[#9CA3AF] hover:text-brand-orange transition-colors cursor-pointer z-10"
         >
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -188,8 +189,9 @@ export default function TaskModal() {
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-[24px]">
           <div className="flex flex-col gap-[7px]">
-            <label className="font-inter text-[14px] text-black">Titre*</label>
+            <label htmlFor="task-title" className="font-inter text-[14px] text-black">Titre*</label>
             <input
+              id="task-title"
               {...register("title", { required: "Le titre est requis" })}
               placeholder="Nom de la tâche"
               className="h-[53px] px-[17px] border border-[#E5E7EB] rounded-[4px] focus:outline-none focus:ring-1 focus:ring-brand-orange"
@@ -198,8 +200,9 @@ export default function TaskModal() {
           </div>
 
           <div className="flex flex-col gap-[7px]">
-            <label className="font-inter text-[14px] text-black">Description*</label>
+            <label htmlFor="task-desc" className="font-inter text-[14px] text-black">Description*</label>
             <textarea
+              id="task-desc"
               {...register("description", { required: "La description est requise" })}
               placeholder="Décrivez la tâche"
               className="h-[100px] py-[13px] px-[17px] border border-[#E5E7EB] rounded-[4px] focus:outline-none focus:ring-1 focus:ring-brand-orange resize-none"
@@ -208,9 +211,10 @@ export default function TaskModal() {
           </div>
 
           <div className="flex flex-col gap-[7px]">
-            <label className="font-inter text-[14px] text-black">Échéance*</label>
+            <label htmlFor="task-due-date" className="font-inter text-[14px] text-black">Échéance*</label>
             <div className="relative">
               <input
+                id="task-due-date"
                 type="date"
                 {...register("dueDate", { required: "L'échéance est requise" })}
                 className="w-full h-[53px] px-[17px] border border-[#E5E7EB] rounded-[4px] focus:outline-none focus:ring-1 focus:ring-brand-orange"
@@ -219,13 +223,14 @@ export default function TaskModal() {
           </div>
 
           <div className="flex flex-col gap-[7px]">
-            <label className="font-inter text-[14px] text-black">Assigné à :</label>
+            <label htmlFor="task-assignees" className="font-inter text-[14px] text-black">Assigné à :</label>
             <Controller
               name="assignees"
               control={control}
               render={({ field }) => (
                 <Select
                   {...field}
+                  inputId="task-assignees"
                   isMulti
                   options={memberOptions}
                   placeholder="Choisir parmi les membres du projet"
@@ -242,13 +247,14 @@ export default function TaskModal() {
           </div>
 
           <div className="flex flex-col gap-[16px]">
-            <label className="font-inter text-[14px] text-black">Statut :</label>
+            <span className="font-inter text-[14px] text-black font-semibold">Statut :</span>
             <div className="flex gap-[8px] flex-wrap">
               {statusOptions.map((opt) => (
                 <button
                   key={opt.value}
                   type="button"
                   onClick={() => setValue("status", opt.value)}
+                  aria-pressed={currentStatus === opt.value}
                   className={`px-[16px] py-[4px] rounded-[50px] transition-all border-2 ${
                     currentStatus === opt.value 
                       ? `${opt.bg} ${opt.text} border-brand-orange` 
@@ -262,13 +268,14 @@ export default function TaskModal() {
           </div>
 
           <div className="flex flex-col gap-[16px]">
-            <label className="font-inter text-[14px] text-black">Priorité :</label>
+            <span className="font-inter text-[14px] text-black font-semibold">Priorité :</span>
             <div className="flex gap-[8px] flex-wrap">
               {priorityOptions.map((opt) => (
                 <button
                   key={opt.value}
                   type="button"
                   onClick={() => setValue("priority", opt.value)}
+                  aria-pressed={currentPriority === opt.value}
                   className={`px-[16px] py-[4px] rounded-[50px] transition-all border-2 ${
                     currentPriority === opt.value 
                       ? `${opt.bg} ${opt.text} border-brand-orange` 

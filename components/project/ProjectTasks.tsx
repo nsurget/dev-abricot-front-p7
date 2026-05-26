@@ -156,6 +156,7 @@ export default function ProjectTasks({ project }: ProjectTasksProps) {
                 <div className="relative group w-full md:w-[350px]">
                     <input
                         type="text"
+                        aria-label="Rechercher une tâche"
                         placeholder="Rechercher une tâche"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}

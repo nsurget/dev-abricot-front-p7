@@ -63,5 +63,5 @@ export function proxy(request: NextRequest) {
 
 // 5. Configurer les routes sur lesquelles le proxy s'active
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|\\.well-known).*)'],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|\\.well-known|.*\\..*).*)'],
 };

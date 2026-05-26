@@ -47,6 +47,8 @@ export default function AiTaskModal() {
   const [tasks, setTasks] = useState<GeneratedTask[]>([]);
   // IDs of tasks currently in edit mode
   const [editingTaskIds, setEditingTaskIds] = useState<string[]>([]);
+  // ID of the task currently showing the assignee dropdown
+  const [openAssigneeDropdownId, setOpenAssigneeDropdownId] = useState<string | null>(null);
   
   // Refs
   const listContainerRef = useRef<HTMLDivElement>(null);
@@ -57,6 +59,7 @@ export default function AiTaskModal() {
       setPromptInput("");
       setTasks([]);
       setEditingTaskIds([]);
+      setOpenAssigneeDropdownId(null);
       setError(null);
       setLoading(false);
       setCreating(false);
@@ -194,6 +197,7 @@ export default function AiTaskModal() {
         <button 
           onClick={closeModal}
           disabled={creating}
+          aria-label="Fermer la boîte de dialogue de génération de tâches"
           className="absolute top-6 right-6 text-neutral-grey-400 hover:text-brand-orange transition-colors cursor-pointer z-10"
         >
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -226,7 +230,7 @@ export default function AiTaskModal() {
             // Initial/Empty State (WOW UI with sparkles and hints)
             <div className="flex-1 flex flex-col items-center justify-center text-center p-6 bg-neutral-grey-50 rounded-[12px] border border-dashed border-neutral-grey-200">
               <div className="w-14 h-14 bg-brand-orange-light text-brand-orange rounded-full flex items-center justify-center mb-4">
-                <StarIcon className="w-7 h-7 fill-brand-orange text-brand-orange" />
+                <StarIcon className="w-7 h-7" />
               </div>
               <h3 className="font-manrope text-base font-semibold text-neutral-grey-800 mb-2">
                 {"Générez des tâches instantanément avec l'IA"}
@@ -249,8 +253,9 @@ export default function AiTaskModal() {
                   // Editable State Form
                   <div className="flex flex-col gap-3">
                     <div className="flex flex-col gap-1">
-                      <label className="text-xs font-semibold text-neutral-grey-600">Titre</label>
+                      <label htmlFor={`ai-title-${task.tempId}`} className="text-xs font-semibold text-neutral-grey-600">Titre</label>
                       <input 
+                        id={`ai-title-${task.tempId}`}
                         type="text" 
                         value={task.title}
                         onChange={(e) => updateTaskField(task.tempId, "title", e.target.value)}
@@ -260,8 +265,9 @@ export default function AiTaskModal() {
                     </div>
                     
                     <div className="flex flex-col gap-1">
-                      <label className="text-xs font-semibold text-neutral-grey-600">Description</label>
+                      <label htmlFor={`ai-desc-${task.tempId}`} className="text-xs font-semibold text-neutral-grey-600">Description</label>
                       <textarea 
+                        id={`ai-desc-${task.tempId}`}
                         value={task.description}
                         onChange={(e) => updateTaskField(task.tempId, "description", e.target.value)}
                         className="w-full px-3 py-1.5 border border-[#e5e7eb] rounded-[6px] text-sm focus:outline-none focus:ring-1 focus:ring-brand-orange text-neutral-grey-600 resize-none h-16"
@@ -271,8 +277,9 @@ export default function AiTaskModal() {
 
                     <div className="grid grid-cols-2 gap-3 mt-1">
                       <div className="flex flex-col gap-1">
-                        <label className="text-xs font-semibold text-neutral-grey-600">Priorité</label>
+                        <label htmlFor={`ai-priority-${task.tempId}`} className="text-xs font-semibold text-neutral-grey-600">Priorité</label>
                         <select
+                          id={`ai-priority-${task.tempId}`}
                           value={task.priority}
                           onChange={(e) => updateTaskField(task.tempId, "priority", e.target.value as GeneratedTask['priority'])}
                           className="px-2.5 py-1.5 border border-[#e5e7eb] rounded-[6px] text-xs bg-white focus:outline-none focus:ring-1 focus:ring-brand-orange"
@@ -284,8 +291,9 @@ export default function AiTaskModal() {
                       </div>
                       
                       <div className="flex flex-col gap-1">
-                        <label className="text-xs font-semibold text-neutral-grey-600">Statut</label>
+                        <label htmlFor={`ai-status-${task.tempId}`} className="text-xs font-semibold text-neutral-grey-600">Statut</label>
                         <select
+                          id={`ai-status-${task.tempId}`}
                           value={task.status}
                           onChange={(e) => updateTaskField(task.tempId, "status", e.target.value as GeneratedTask['status'])}
                           className="px-2.5 py-1.5 border border-[#e5e7eb] rounded-[6px] text-xs bg-white focus:outline-none focus:ring-1 focus:ring-brand-orange"
@@ -299,8 +307,9 @@ export default function AiTaskModal() {
 
                     <div className="grid grid-cols-2 gap-3 mt-1">
                       <div className="flex flex-col gap-1">
-                        <label className="text-xs font-semibold text-neutral-grey-600">Échéance</label>
+                        <label htmlFor={`ai-due-${task.tempId}`} className="text-xs font-semibold text-neutral-grey-600">Échéance</label>
                         <input 
+                          id={`ai-due-${task.tempId}`}
                           type="date" 
                           value={task.dueDate}
                           onChange={(e) => updateTaskField(task.tempId, "dueDate", e.target.value)}
@@ -309,9 +318,15 @@ export default function AiTaskModal() {
                       </div>
 
                       <div className="flex flex-col gap-1">
-                        <label className="text-xs font-semibold text-neutral-grey-600">Assigner à</label>
-                        <div className="relative group/assign">
-                          <div className="min-h-[32px] px-2.5 py-1 border border-[#e5e7eb] rounded-[6px] text-xs flex items-center justify-between bg-white cursor-pointer select-none">
+                        <span className="text-xs font-semibold text-neutral-grey-600">Assigner à</span>
+                        <div className="relative">
+                          <button
+                            type="button"
+                            onClick={() => setOpenAssigneeDropdownId(prev => prev === task.tempId ? null : task.tempId)}
+                            aria-haspopup="true"
+                            aria-expanded={openAssigneeDropdownId === task.tempId}
+                            className="w-full text-left min-h-[32px] px-2.5 py-1 border border-[#e5e7eb] rounded-[6px] text-xs flex items-center justify-between bg-white cursor-pointer select-none focus:outline-none focus:ring-1 focus:ring-brand-orange"
+                          >
                             <span className="truncate max-w-[110px]">
                               {task.assigneeIds.length === 0 
                                 ? "Non assigné" 
@@ -321,36 +336,38 @@ export default function AiTaskModal() {
                             <svg className="w-3.5 h-3.5 text-neutral-grey-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                             </svg>
-                          </div>
+                          </button>
                           
                           {/* Assignee Checkboxes Dropdown */}
-                          <div className="hidden group-hover/assign:flex absolute bottom-full right-0 mb-1 flex-col bg-white border border-[#e5e7eb] rounded-[8px] shadow-lg max-h-40 overflow-y-auto w-48 z-[200] p-1.5">
-                            <p className="text-[10px] font-bold text-neutral-grey-400 px-2 py-1 uppercase border-b border-neutral-grey-100 mb-1">
-                              Membres du projet
-                            </p>
-                            {projectMembers.map((member) => {
-                              const isChecked = task.assigneeIds.includes(member.id);
-                              return (
-                                <label 
-                                  key={member.id} 
-                                  className="flex items-center gap-2 px-2 py-1 text-xs text-neutral-grey-800 hover:bg-neutral-grey-50 rounded cursor-pointer"
-                                >
-                                  <input 
-                                    type="checkbox"
-                                    checked={isChecked}
-                                    onChange={() => {
-                                      const newIds = isChecked 
-                                        ? task.assigneeIds.filter(id => id !== member.id)
-                                        : [...task.assigneeIds, member.id];
-                                      updateTaskField(task.tempId, "assigneeIds", newIds);
-                                    }}
-                                    className="accent-brand-orange"
-                                  />
-                                  <span className="truncate font-medium">{member.name || member.email}</span>
-                                </label>
-                              );
-                            })}
-                          </div>
+                          {openAssigneeDropdownId === task.tempId && (
+                            <div className="absolute bottom-full right-0 mb-1 flex flex-col bg-white border border-[#e5e7eb] rounded-[8px] shadow-lg max-h-40 overflow-y-auto w-48 z-[200] p-1.5 animate-in fade-in slide-in-from-bottom-2">
+                              <p className="text-[10px] font-bold text-neutral-grey-400 px-2 py-1 uppercase border-b border-neutral-grey-100 mb-1">
+                                Membres du projet
+                              </p>
+                              {projectMembers.map((member) => {
+                                const isChecked = task.assigneeIds.includes(member.id);
+                                return (
+                                  <label 
+                                    key={member.id} 
+                                    className="flex items-center gap-2 px-2 py-1 text-xs text-neutral-grey-800 hover:bg-neutral-grey-50 rounded cursor-pointer"
+                                  >
+                                    <input 
+                                      type="checkbox"
+                                      checked={isChecked}
+                                      onChange={() => {
+                                        const newIds = isChecked 
+                                          ? task.assigneeIds.filter(id => id !== member.id)
+                                          : [...task.assigneeIds, member.id];
+                                        updateTaskField(task.tempId, "assigneeIds", newIds);
+                                      }}
+                                      className="accent-brand-orange"
+                                    />
+                                    <span className="truncate font-medium">{member.name || member.email}</span>
+                                  </label>
+                                );
+                              })}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -468,7 +485,7 @@ export default function AiTaskModal() {
           {loading && (
             <div className="flex-1 flex flex-col gap-4 justify-center items-center py-10 bg-neutral-grey-50 rounded-[12px] border border-neutral-grey-100 animate-pulse text-center">
               <div className="relative">
-                <StarIcon className="w-10 h-10 fill-brand-orange text-brand-orange animate-spin" />
+                <StarIcon className="w-10 h-10 fill-brand-orange text-brand-orange animate-spin" fill="brand-orange" />
               </div>
               <div className="flex flex-col gap-1 items-center mt-2">
                 <p className="font-manrope font-semibold text-neutral-grey-800 text-sm">
