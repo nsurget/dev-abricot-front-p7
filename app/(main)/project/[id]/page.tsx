@@ -6,6 +6,7 @@ import PageHero from "@/components/layout/PageHero";
 import ProjectMembers from "@/components/project/ProjectMembers";
 import { useRouter } from "next/navigation";
 import ProjectTasks from "@/components/project/ProjectTasks";
+import { useUserInfo } from "@/hooks/useUserInfo";
 
 import { useProjectModalStore } from "@/store/projectModalStore";
 import { useTaskModalStore } from "@/store/taskModalStore";
@@ -15,7 +16,7 @@ import StarIcon from "@/components/icons/StarIcon";
 
 export default function ProjectSinglePage({
   params
-}: {
+ }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
@@ -25,6 +26,7 @@ export default function ProjectSinglePage({
   const openTaskModal = useTaskModalStore((state) => state.openModal);
   const openAiTaskModal = useAiTaskModalStore((state) => state.openModal);
   const addToast = useToastStore((state) => state.addToast);
+  const currentUser = useUserInfo();
 
   // Utiliser useEffect pour afficher l'erreur si elle existe
   React.useEffect(() => {
@@ -106,15 +108,19 @@ export default function ProjectSinglePage({
     <div className="py-8">
       <PageHero
               title={project?.name || ""}
-              titleAction={() => project && openProjectModal('edit', {
-                id: project.id,
-                name: project.name,
-                description: project.description,
-                ownerId: project.ownerId,
-                ownerEmail: project.owner?.email,
-                contributors: project.members?.map(m => m.user.email) || [],
-                members: project.members
-              })}
+              titleAction={
+                (project && currentUser && currentUser.id === project.ownerId)
+                  ? () => openProjectModal('edit', {
+                      id: project.id,
+                      name: project.name,
+                      description: project.description,
+                      ownerId: project.ownerId,
+                      ownerEmail: project.owner?.email,
+                      contributors: project.members?.map(m => m.user.email) || [],
+                      members: project.members
+                    })
+                  : undefined
+              }
               subtitle={project?.description || ""}
               onBack={router.back}
               actions={[
